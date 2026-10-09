@@ -260,7 +260,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
       <div class="mods" style="grid-template-columns: minmax(0, 1fr)">
         <a class="mod-card" href="#buildadvisor">
           <h2><span class="glyph g-ba" aria-hidden="true"></span>Build Advisor</h2>
-          <dl><dt>Hotkey</dt><dd><kbd>F7</kbd> advisor window</dd><dt>For</dt><dd>every player, any character</dd><dt>Needs</dt><dd>Script Extender v20 or newer</dd></dl>
+          <dl><dt>Hotkey</dt><dd><kbd>F7</kbd> advisor window</dd><dt>For</dt><dd>every player, any character</dd><dt>Needs</dt><dd>Script Extender v33 or newer for the stars in the menus</dd></dl>
         </a>
       </div>
       <div class="note">
@@ -275,7 +275,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
       </div>
       <h3 id="se">Script Extender and a mod manager</h3>
       <ol class="steps">
-        <li>Get <a href="https://github.com/LaughingLeader/BG3ModManager">BG3 Mod Manager</a> (free). In it, choose <i>Tools &gt; Download and Extract the Script Extender</i>. That installs <a href="https://github.com/Norbyte/bg3se">BG3 Script Extender</a> (version 20 or newer) in one click. Script Extender is a separate community project and is not included with this mod.</li>
+        <li>Get <a href="https://github.com/LaughingLeader/BG3ModManager">BG3 Mod Manager</a> (free). In it, choose <i>Tools &gt; Download and Extract the Script Extender</i>. That installs <a href="https://github.com/Norbyte/bg3se">BG3 Script Extender</a> in one click. Build Advisor's marks inside the game's own interface need version 33 or newer; until v33 is a normal release, get it from the Devel channel: create a file <code>ScriptExtenderUpdaterConfig.json</code> in the game's <code>bin</code> folder containing <code>{"UpdateChannel": "Devel"}</code>, then start the game once. Delete that file to go back to normal releases. Script Extender is a separate community project and is not included with this mod.</li>
         <li>Drag <code>BuildAdvisor.pak</code> into BG3 Mod Manager (or <i>File &gt; Import Mod</i>), move Build Advisor to the active mods list, then <i>Save Load Order</i> and <i>Export Load Order to Game</i>.</li>
         <li>Start the game. If a <b>Mod Verification</b> dialog lists Build Advisor, tick it and choose Start Game.</li>
       </ol>
@@ -308,12 +308,12 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
 
       <h3 id="ba-install">Requirements and install</h3>
       <div class="facts">
-        <div class="fact"><span class="eyebrow">Needs</span><b>Script Extender v20+</b><br><small>tested with v32</small></div>
+        <div class="fact"><span class="eyebrow">Needs</span><b>Script Extender v33+</b><br><small>for the stars in the menus; the window works on v32</small></div>
         <div class="fact"><span class="eyebrow">Game language</span><b>English</b> for the in-menu stars<br><small>the window works in any language</small></div>
         <div class="fact"><span class="eyebrow">Save safety</span><b>Nothing is written to saves</b><br><small>safe to add or remove at any time</small></div>
       </div>
       <ol class="steps">
-        <li>Install Script Extender (BG3 Mod Manager offers it).</li>
+        <li>Install Script Extender (BG3 Mod Manager offers it). The stars and outlines need v33 or newer. Until v33 is a normal release, get it from the Devel channel: create a file <code>ScriptExtenderUpdaterConfig.json</code> in the game's <code>bin</code> folder containing <code>{"UpdateChannel": "Devel"}</code>, then start the game once. Delete that file to go back to normal releases.</li>
         <li>Import <code>BuildAdvisor.pak</code> with BG3 Mod Manager and enable it, then export the load order. Or copy the pak to <code>%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\</code> and enable it in the game's mod manager.</li>
         <li>Start the game. If a <b>Mod Verification</b> dialog lists Build Advisor, tick it and choose Start Game. The Script Extender console prints <code>[Build Advisor] loaded</code>.</li>
       </ol>
@@ -444,6 +444,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
           <tr><td><code>ShowAll</code></td><td><code>false</code></td><td>List every build.</td></tr>
           <tr><td><code>FontScale</code></td><td><code>0.75</code></td><td>Text size of Script Extender windows (applies to all of them).</td></tr>
           <tr><td><code>Choices</code></td><td>empty</td><td>Your build pick per character. Loot Advisor reads it too.</td></tr>
+          <tr><td><code>UnsafeUiOnOldSE</code></td><td><code>false</code></td><td><code>true</code> draws the stars and outlines on Script Extender older than v33 anyway. Older versions change the menus while the game draws them, which can crash the game; use v33 instead.</td></tr>
         </tbody>
       </table></div>
       <p class="prose"><b>Console commands</b> (Script Extender console): <code>!ba_toggle</code> opens or closes the window, <code>!ba_hotkey F8</code> changes the key, <code>!ba_dump</code> prints what the mod detects (useful when something does not show).</p>

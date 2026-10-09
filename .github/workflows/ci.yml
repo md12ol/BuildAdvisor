@@ -86,6 +86,8 @@ jobs:
       - run: pip install -q "lupa==$LUPA_VERSION"
       - name: Mock tests (mod against a mocked Script Extender)
         run: python BuildAdvisor/tools/run_tests.py
+      - name: Mutations (the UI-thread gate removed must turn the tests red)
+        run: python BuildAdvisor/tools/run_tests.py --mutate
       - name: Leak scan of shipped files (Loot Advisor's scanner covers both mods)
         run: python LootAdvisor/tools/leak_scan.py
       - name: Pak build (no install, no game) + package folder complete per INSTALL.md

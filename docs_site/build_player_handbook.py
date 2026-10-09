@@ -35,13 +35,13 @@ MODS = {
                      "tagline": "The strongest build for your character, starred in the game's own menus: character "
                                 "creation, Withers' respec and every level-up.",
                      "facts": [("Hotkey", "<kbd>F7</kbd> advisor window"), ("For", "every player, any character"),
-                               ("Needs", "Script Extender v20 or newer")]},
+                               ("Needs", "Script Extender v33 or newer for the stars in the menus")]},
     "LootAdvisor": {"name": "Loot Advisor", "chapter": "lootadvisor", "key": "F6", "other": "Build Advisor",
                     "other_repo": "https://github.com/md12ol/BuildAdvisor", "repo": "https://github.com/md12ol/LootAdvisor",
                     "tagline": "The right gear for your build, and where to find it: rainbow frames, rainbow map "
                                "markers, an item list and a live Sets page in your browser.",
                     "facts": [("Hotkey", "<kbd>F6</kbd> item list"), ("For", "the 7 origin characters"),
-                              ("Needs", "Script Extender v20 or newer")]},
+                              ("Needs", "Script Extender v33 or newer for frames and map painting")]},
 }
 
 SE_URL = "https://github.com/Norbyte/bg3se"
@@ -202,7 +202,7 @@ def shared_chapter(mod):
       </div>
       <h3 id="se">Script Extender and a mod manager</h3>
       <ol class="steps">
-        <li>Get <a href="%(bg3mm)s">BG3 Mod Manager</a> (free). In it, choose <i>Tools &gt; Download and Extract the Script Extender</i>. That installs <a href="%(se)s">BG3 Script Extender</a> (version 20 or newer) in one click. Script Extender is a separate community project and is not included with this mod.</li>
+        <li>Get <a href="%(bg3mm)s">BG3 Mod Manager</a> (free). In it, choose <i>Tools &gt; Download and Extract the Script Extender</i>. That installs <a href="%(se)s">BG3 Script Extender</a> in one click. %(name)s's marks inside the game's own interface need version 33 or newer; until v33 is a normal release, get it from the Devel channel: create a file <code>ScriptExtenderUpdaterConfig.json</code> in the game's <code>bin</code> folder containing <code>{"UpdateChannel": "Devel"}</code>, then start the game once. Delete that file to go back to normal releases. Script Extender is a separate community project and is not included with this mod.</li>
         <li>Drag <code>%(mod)s.pak</code> into BG3 Mod Manager (or <i>File &gt; Import Mod</i>), move %(name)s to the active mods list, then <i>Save Load Order</i> and <i>Export Load Order to Game</i>.</li>
         <li>Start the game. If a <b>Mod Verification</b> dialog lists %(name)s, tick it and choose Start Game.</li>
       </ol>

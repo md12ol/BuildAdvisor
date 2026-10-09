@@ -92,6 +92,7 @@ local subs = { Tick = {}, KeyInput = {}, SessionLoaded = {}, ResetCompleted = {}
 local function event(name) return { Subscribe = function(_, f) table.insert(subs[name], f) end } end
 local now = 0
 local files = {}
+local deferred = {}
 
 Ext = {
   Require = function(p) return dofile(LUA .. p) end,
@@ -99,7 +100,8 @@ Ext = {
   Loca = { GetTranslatedString = function(h) return h == "hdeadbeefg1234g" and "Intimidation" or h end },
   Entity = { GetAllEntitiesWithComponent = function(c) return entities[c] or {} end },
   IMGUI = { NewWindow = function(t) return node("Window", t) end },
-  UI = { GetRoot = function() return uiRoot end, Instantiate = function() return {} end },
+  UI = { GetRoot = function() return uiRoot end, Instantiate = function() return {} end,
+         Defer = function(f) table.insert(deferred, f) end }, -- run at the end of tick(), like the next UI update
   IO = { LoadFile = function(p) return files[p] end, SaveFile = function(p, s) files[p] = s; return true end },
   Json = { Parse = function() return {} end, Stringify = function() return "{}" end },
   Utils = { MonotonicTime = function() return now end, Print = print, PrintWarning = print, PrintError = print },
@@ -111,7 +113,12 @@ _D = print
 dofile(LUA .. "BootstrapClient.lua")
 for _, f in ipairs(subs.SessionLoaded) do f() end
 
-local function tick() now = now + 1100; for _, f in ipairs(subs.Tick) do f() end end
+local function tick()
+  now = now + 1100
+  for _, f in ipairs(subs.Tick) do f() end
+  local q = deferred; deferred = {}
+  for _, f in ipairs(q) do f() end
+end
 local function dump(title)
   print("\n==== " .. title .. " ====")
   for _, l in ipairs(log) do print(l) end
