@@ -120,6 +120,15 @@ const L = {
         ${M.private ? `<div style="margin-top:22px">${stampOrKey(22)}</div>` : ""}
       </div>`;
   },
+  logo() {
+    // The in-game mod manager image (16:9, shown down to 244x136): the plate and the name only, both large enough to read there.
+    const words = M.name.split(" ");
+    S.innerHTML = frame(18, 14) +
+      `<div class="abs" style="inset:0;display:flex;align-items:center;justify-content:center;gap:60px">${plate(340)}
+        <div><div class="title" style="font-size:${words.length > 1 ? 152 : 136}px">${words.join("<br>")}</div>
+        <div class="divider" style="width:440px;margin:34px 0 22px"><b></b></div>
+        <div class="tag" style="font-size:34px">${M.private ? "Private play-testing tool." : M.short}</div></div></div>`;
+  },
   docs() {
     S.innerHTML = frame(14, 12) +
       `<div class="abs" style="left:70px;top:0;bottom:0;display:flex;align-items:center;gap:40px">${plate(150)}
