@@ -58,7 +58,7 @@ To edit or add builds, change `Mods/BuildAdvisor/ScriptExtender/Lua/Shared/Build
 python tools/check_hl.py        # 0 unknown labels, 0 plan errors
 python ../BG3Tools/tools/build_pak.py BuildAdvisor   # -> ../BG3Tools/dist/ AND BuildAdvisor/BuildAdvisor.pak
 ```
-The pak builder lives in the sibling repository [BG3Tools](https://github.com/md12ol/BG3Tools), checked out next to this one; every build copies the fresh pak into the `BuildAdvisor/` install folder, so the committed pak never goes stale. `Mods/BuildAdvisor` is the source, `BuildAdvisor/` only holds the built pak + `INSTALL.md`.
+The pak builder lives in the sibling repository [BG3Tools](https://github.com/md12ol/BG3Tools), checked out next to this one; every build copies the fresh pak into the `BuildAdvisor/` install folder, so the committed pak never goes stale. `Mods/BuildAdvisor` is the source. `BuildAdvisor/` holds what a player needs: the built pak, `INSTALL.md`, `Handbook.html` (the player handbook, generated from `docs_site/mods_docs.html` by `python docs_site/build_player_handbook.py`, with a leak check) and `Media/` (Gilded Panel banner, thumbnail, marks, screenshots; list in BG3Tools `tools/release_files.py`).
 The outline textures are built with `python ../LootAdvisor/tools/make_la_gui.py Mods/BuildAdvisor/GUI --set build` (sibling LootAdvisor repository; recoloured from the game's own frame textures, shipped under Larian's modding terms).
 
 ## Tests
