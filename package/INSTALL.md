@@ -15,8 +15,12 @@
 
 ## Requirements
 - Baldur's Gate 3 (Patch 8).
-- [BG3 Script Extender](https://github.com/Norbyte/bg3se) v20 or newer. It is a separate project and is not included;
+- [BG3 Script Extender](https://github.com/Norbyte/bg3se). It is a separate project and is not included;
   [BG3 Mod Manager](https://github.com/LaughingLeader/BG3ModManager) installs it in one click.
+- **The stars and outlines in the game's menus need Script Extender v33 or newer.** On v32 the advisor window (F7)
+  works. Until v33 is a normal release, get it from the Devel channel: create a file
+  `ScriptExtenderUpdaterConfig.json` in the game's `bin` folder containing `{"UpdateChannel": "Devel"}`,
+  then start the game once. Delete that file to go back to normal releases.
 - Game language English for the in-menu marks (the advisor window works in any language).
 
 ## Install with BG3 Mod Manager

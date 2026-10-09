@@ -13,7 +13,10 @@ It works in two ways:
 2. **Advisor window** (F7): shows the build, a "DO THIS NOW" list for the current level, `[OK]` / `[CHANGE]` checks for your current race, class and point-buy, and the full level 1-12 plan.
 
 ## Requirements
-- [BG3 Script Extender](https://github.com/Norbyte/bg3se) v20 or newer. BG3 Mod Manager can install it.
+- [BG3 Script Extender](https://github.com/Norbyte/bg3se). BG3 Mod Manager can install it. The stars and outlines in the
+  game's menus need v33 or newer; on v32 the advisor window works. Until v33 is a normal release, get it from the Devel channel: create a file
+  `ScriptExtenderUpdaterConfig.json` in the game's `bin` folder containing `{"UpdateChannel": "Devel"}`,
+  then start the game once. Delete that file to go back to normal releases.
 - Game language set to English. The in-menu highlighting matches English labels; the advisor window works in any language.
 
 ## Install
