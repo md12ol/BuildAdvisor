@@ -313,7 +313,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
         </a>
       </div>
       <div class="note">
-        <p><b>Both need Baldur's Gate 3 Script Extender</b> (version 20 or newer; tested with version 32). BG3 Mod Manager can install it. Each mod works on its own; Loot Advisor reads Build Advisor's build choice when both are installed.</p>
+        <p><b>Both need Baldur's Gate 3 Script Extender.</b> BG3 Mod Manager can install it. The marks inside the game's own interface need Script Extender v33 or newer: Build Advisor's stars and outlines in the menus, Loot Advisor's item frames, tooltip lines and map painting. Everything else works on v32 (tested). Until v33 is a normal release, get it from the Devel channel: create a file <code>ScriptExtenderUpdaterConfig.json</code> in the game's <code>bin</code> folder containing <code>{"UpdateChannel": "Devel"}</code>, then start the game once. Delete that file to go back to normal releases. Each mod works on its own; Loot Advisor reads Build Advisor's build choice when both are installed.</p>
       </div>
     </header>
 
@@ -330,12 +330,12 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
 
       <h3 id="ba-install">Requirements and install</h3>
       <div class="facts">
-        <div class="fact"><span class="eyebrow">Needs</span><b>Script Extender v20+</b><br><small>tested with v32</small></div>
+        <div class="fact"><span class="eyebrow">Needs</span><b>Script Extender v33+</b><br><small>for the stars in the menus; the window works on v32</small></div>
         <div class="fact"><span class="eyebrow">Game language</span><b>English</b> for the in-menu stars<br><small>the window works in any language</small></div>
         <div class="fact"><span class="eyebrow">Save safety</span><b>Nothing is written to saves</b><br><small>safe to add or remove at any time</small></div>
       </div>
       <ol class="steps">
-        <li>Install Script Extender (BG3 Mod Manager offers it).</li>
+        <li>Install Script Extender (BG3 Mod Manager offers it). The stars and outlines need v33 or newer. Until v33 is a normal release, get it from the Devel channel: create a file <code>ScriptExtenderUpdaterConfig.json</code> in the game's <code>bin</code> folder containing <code>{"UpdateChannel": "Devel"}</code>, then start the game once. Delete that file to go back to normal releases.</li>
         <li>Import <code>BuildAdvisor.pak</code> with BG3 Mod Manager and enable it, then export the load order. Or copy the pak to <code>%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\</code> and enable it in the game's mod manager.</li>
         <li>Start the game. If a <b>Mod Verification</b> dialog lists Build Advisor, tick it and choose Start Game. The Script Extender console prints <code>[Build Advisor] loaded</code>.</li>
       </ol>
@@ -467,6 +467,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
           <tr><td><code>ShowAll</code></td><td><code>false</code></td><td>List every build.</td></tr>
           <tr><td><code>FontScale</code></td><td><code>0.75</code></td><td>Text size of Script Extender windows (applies to all of them).</td></tr>
           <tr><td><code>Choices</code></td><td>empty</td><td>Your build pick per character. Loot Advisor reads it too.</td></tr>
+          <tr><td><code>UnsafeUiOnOldSE</code></td><td><code>false</code></td><td><code>true</code> draws the stars and outlines on Script Extender older than v33 anyway. Older versions change the menus while the game draws them, which can crash the game; use v33 instead.</td></tr>
         </tbody>
       </table></div>
       <p class="prose"><b>Console commands</b> (Script Extender console): <code>!ba_toggle</code> opens or closes the window, <code>!ba_hotkey F8</code> changes the key, <code>!ba_dump</code> prints what the mod detects (useful when something does not show).</p>
@@ -528,12 +529,12 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
 
       <h3 id="la-install">Requirements and install</h3>
       <div class="facts">
-        <div class="fact"><span class="eyebrow">Needs</span><b>Script Extender v20+</b><br><small>tested with v32</small></div>
+        <div class="fact"><span class="eyebrow">Needs</span><b>Script Extender v33+</b><br><small>for frames and map painting; the list and Sets page work on v32</small></div>
         <div class="fact"><span class="eyebrow">Optional</span><b>Build Advisor</b><br><small>your build pick there is used to break ties</small></div>
         <div class="fact"><span class="eyebrow">Disk</span><b>3.75 MB pak</b><br><small>+ about 18 MB for the Sets page, built on first load</small></div>
       </div>
       <ol class="steps">
-        <li>Install Script Extender.</li>
+        <li>Install Script Extender. Item frames and map painting need v33 or newer. Until v33 is a normal release, get it from the Devel channel: create a file <code>ScriptExtenderUpdaterConfig.json</code> in the game's <code>bin</code> folder containing <code>{"UpdateChannel": "Devel"}</code>, then start the game once. Delete that file to go back to normal releases.</li>
         <li>Import <code>LootAdvisor.pak</code> with BG3 Mod Manager and enable it (or copy it to the game's <code>Mods</code> folder and enable it in the game's mod manager).</li>
         <li>Start the game and load a save. Tick Loot Advisor if the <b>Mod Verification</b> dialog lists it. The console prints <code>[Loot Advisor] loaded - F6 toggles the item list.</code></li>
         <li>Select an origin character. Frames and map markers appear within about a second; press <kbd>F6</kbd> for the list.</li>
@@ -790,6 +791,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
           <tr><td><code>Markers</code></td><td><code>true</code></td><td>Map markers.</td></tr>
           <tr><td><code>Tooltips</code></td><td><code>true</code></td><td>"Why" text in item tooltips.</td></tr>
           <tr><td><code>Arrows</code></td><td><code>5</code></td><td>How many off-screen markers keep a rainbow arrow.</td></tr>
+          <tr><td><code>UnsafeUiOnOldSE</code></td><td><code>false</code></td><td><code>true</code> draws frames, tooltip lines and map painting on Script Extender older than v33 anyway. Older versions change the interface while the game draws it, which can crash the game (seen in combat); use v33 instead.</td></tr>
           <tr><td><code>Page</code></td><td><code>true</code></td><td><code>false</code> stops writing the Sets page and its live state.</td></tr>
           <tr><td><code>ActOverride</code></td><td>none</td><td>Force act 1, 2 or 3 instead of the one detected from your region.</td></tr>
           <tr><td><code>NorthZ</code>, <code>EastX</code></td><td><code>1</code></td><td>Set to <code>-1</code> to flip the list's compass if directions ever look mirrored.</td></tr>

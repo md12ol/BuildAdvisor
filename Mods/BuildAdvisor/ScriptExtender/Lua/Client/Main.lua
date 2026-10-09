@@ -4,7 +4,8 @@ local SETTINGS_FILE = "BuildAdvisor_settings.json"
 local DETECT_INTERVAL_MS = 500
 local HIGHLIGHT_INTERVAL_MS = 1000
 
-BA.Settings = { Hotkey = "F7", AutoOpen = true, Highlight = true, ShowAll = false, FontScale = 0.75, Choices = {} }
+BA.Settings = { Hotkey = "F7", AutoOpen = true, Highlight = true, ShowAll = false, FontScale = 0.75, Choices = {},
+                UnsafeUiOnOldSE = false }
 
 function BA.LoadSettings()
   local ok, raw = pcall(Ext.IO.LoadFile, SETTINGS_FILE)
@@ -48,7 +49,7 @@ function BA.Refresh(force)
     if creation then
       if BA.Settings.AutoOpen then BA.UI.Show() end
     else
-      BA.HL.Clear()
+      BA.HL.Run(BA.HL.Clear)
       if lastCreation ~= nil then BA.UI.Hide() end
     end
     lastCreation = creation
@@ -89,8 +90,11 @@ local function onTick()
     local cur = BA.Current
     if cur and cur.analysis and BA.IsCreationMode(cur.ctx) then
       local opts = { onlyPlannedAbilities = cur.ctx.mode == "Level Up" }
-      local ok, err = pcall(BA.HL.Apply, cur.analysis.highlight, cur.analysis.abilityPlan, cur.analysis.skillPlan, opts)
-      if not ok then Ext.Utils.PrintWarning("[Build Advisor] highlight failed: " .. tostring(err)) end
+      local a = cur.analysis
+      BA.HL.Run(function()
+        local ok, err = pcall(BA.HL.Apply, a.highlight, a.abilityPlan, a.skillPlan, opts)
+        if not ok then Ext.Utils.PrintWarning("[Build Advisor] highlight failed: " .. tostring(err)) end
+      end)
     end
   end
 end

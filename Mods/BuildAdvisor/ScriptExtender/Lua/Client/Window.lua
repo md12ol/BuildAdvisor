@@ -82,7 +82,7 @@ function BA.UI.Init()
   cbHl.SameLine = true
   cbHl.OnChange = function(c)
     BA.Settings.Highlight = c.Checked; BA.SaveSettings()
-    if not c.Checked then BA.HL.Clear() end
+    if not c.Checked then BA.HL.Run(BA.HL.Clear) end
     BA.Refresh(true)
   end
   local cbAuto = w:AddCheckbox("Auto-open", BA.Settings.AutoOpen)

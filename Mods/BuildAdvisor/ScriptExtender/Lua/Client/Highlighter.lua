@@ -47,6 +47,30 @@ local function try(f, ...)
   return nil
 end
 
+-- Every read or write of the Noesis tree goes through BA.HL.Run. Noesis renders in parallel with Lua, so a walk
+-- from the game tick can reach an element the UI has just freed and crash the game. Ext.UI.Defer (Script Extender
+-- v33+) runs the code at the start of the next UI update, where that cannot happen. Older Script Extender has no
+-- safe moment, so the code is skipped there unless the player opts in with the setting UnsafeUiOnOldSE.
+-- Returns true when fn was run or queued.
+local warnedOldSE = false
+function BA.HL.Run(fn)
+  local defer = try(function() return Ext.UI.Defer end)
+  if defer then
+    defer(function() pcall(fn) end)
+    return true
+  end
+  if BA.Settings and BA.Settings.UnsafeUiOnOldSE == true then
+    pcall(fn)
+    return true
+  end
+  if not warnedOldSE then
+    warnedOldSE = true
+    Ext.Utils.Print("[Build Advisor] the stars and outlines in the game's menus need Script Extender v33 or newer;"
+      .. " this Script Extender is older, so they are off. The advisor window still works.")
+  end
+  return false
+end
+
 local function stripMark(t)
   if t:sub(1, #MARK) == MARK then return t:sub(#MARK + 1), true end
   return t, false
