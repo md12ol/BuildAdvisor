@@ -1,0 +1,77 @@
+# Adapted from the issue templates of BG3 Script Extender (Norbyte/bg3se, itself from tModLoader),
+# BG3 Mod Manager (LaughingLeader/BG3ModManager) and BG3 Community Library.
+
+name: Wrong or missing highlight
+description: A star, outline or ability target is missing, on the wrong option, or the build plan looks wrong
+labels: ["build"]
+body:
+- type: markdown
+  attributes:
+    value: |
+      Use this form when the advice itself looks wrong (not when something is broken - use *Bug report* for that).
+
+- type: input
+  id: build
+  attributes:
+    label: Character and build
+    description: Who you were building and the build picked in the Build Advisor window (F7).
+    placeholder: Shadowheart - Light Cleric
+  validations:
+    required: true
+
+- type: dropdown
+  id: screen
+  attributes:
+    label: Screen
+    options:
+      - Character creation
+      - Level-up
+      - Respec (Withers)
+      - Build Advisor window (F7)
+  validations:
+    required: true
+
+- type: input
+  id: level
+  attributes:
+    label: Level and step
+    placeholder: Level 4 - feat choice
+  validations:
+    required: true
+
+- type: dropdown
+  id: kind
+  attributes:
+    label: What is wrong?
+    multiple: true
+    options:
+      - A choice the build needs has no star / outline
+      - A star / outline is on the wrong option
+      - The ability score target is wrong
+      - The build plan itself looks wrong or outdated
+      - The text is wrong or unclear
+      - Something else
+  validations:
+    required: true
+
+- type: textarea
+  id: why
+  attributes:
+    label: Details
+    description: What you saw, and what you expected (a screenshot of the screen helps most).
+  validations:
+    required: true
+
+- type: input
+  id: version
+  attributes:
+    label: Build Advisor version
+    placeholder: 0.9.0
+  validations:
+    required: true
+
+- type: textarea
+  id: screenshots
+  attributes:
+    label: Screenshots
+    description: Drag files into this box.
