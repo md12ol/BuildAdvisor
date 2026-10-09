@@ -1,8 +1,5 @@
-# BuildAdvisor - PUBLIC repo (decisions 71-73, 80-81). Our code, mod source, tests, own art, doc screenshots and the
+# BuildAdvisor - PUBLIC repo. Our code, mod source, tests, own art, doc screenshots and the
 # built pak in the install folder BuildAdvisor/. No extracted game files.
-
-# shared Claude folder: a link to ../.claude, its own private repo
-.claude
 
 # built paks anywhere except the install folder (refreshed by ../BG3Tools/tools/build_pak.py)
 *.pak
