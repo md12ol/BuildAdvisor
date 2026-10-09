@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Option 2 - Astrolabe</title>
+<!-- Option 2 "Astrolabe": near-black, the mod's sigil glowing in its identity colour, Cinzel capitals, and one real proof
+     image seen through a round lens ringed by an engraved instrument dial (ticks + the mod's four parts). -->
+<link rel="stylesheet" href="common.css">
+<style>
+  .stage { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(ellipse 80% 90% at 70% 50%, #17120e 0%, #0a0807 55%, #050404 100%); }
+  .m-ap .stage { background: radial-gradient(ellipse 80% 90% at 70% 50%, #1c100d 0%, #0b0706 55%, #050404 100%); }
+  .bgimg { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(22px) brightness(.32) saturate(.85); opacity: .9;
+    -webkit-mask-image: radial-gradient(ellipse 60% 75% at 72% 50%, #000 30%, transparent 75%); }
+  .eyebrow { font-family: "Alegreya Sans SC", sans-serif; font-weight: 700; letter-spacing: .3em; color: #9d8e78; text-transform: lowercase; }
+  .title { font-family: "Cinzel", serif; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; line-height: 1.02;
+    background: linear-gradient(180deg, #fff7e4 0%, #eedcb4 60%, #b89a66 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,.6)); }
+  .tag { font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500; color: #d8ccb4; }
+  .rule { height: 2px; background: linear-gradient(90deg, var(--id), transparent); }
+  .m-la .rule { background: linear-gradient(90deg, #ff4d4d, #ffb84d, #f5f54d, #4dff88, #4dd2ff, #6b6bff, #d24dff 70%, transparent); }
+  .feats { list-style: none; font-family: "Alegreya", serif; color: #bfb39c; }
+  .feats li { margin-top: .4em; padding-left: 1.4em; position: relative; }
+  .feats li::before { content: ""; position: absolute; left: 0; top: .55em; width: .7em; height: 1px; background: var(--id); }
+  .m-la .feats li::before { background: linear-gradient(90deg, #ff4d4d, #4dd2ff, #d24dff); }
+  .abs { position: absolute; }
+  .lens { position: absolute; border-radius: 50%; overflow: hidden; background: #000; box-shadow: 0 0 0 2px rgba(0,0,0,.9), 0 0 120px rgba(0,0,0,.9); }
+  .lens > img { width: 100%; height: 100%; object-fit: cover; }
+  .lens::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 60px 20px rgba(0,0,0,.75); pointer-events: none; }
+  .dial { position: absolute; pointer-events: none; }
+  .prismring { position: absolute; border-radius: 50%; background: var(--prism);
+    -webkit-mask-image: radial-gradient(circle, transparent calc(var(--ri) - 1px), #000 var(--ri), #000 var(--ro), transparent calc(var(--ro) + 1px)); }
+  .sigil { position: relative; }
+  .const text { font-family: "Alegreya", serif; fill: #cdbf9f; }
+  .const .cls { font-family: "Alegreya Sans SC", sans-serif; font-weight: 700; letter-spacing: .18em; fill: #8f8577; }
+</style>
+</head>
+<body>
+<div class="stage grain" id="stage"></div>
+<script src="common.js"></script>
+<script>
+const { MOD, FMT, M, emblem, apLog } = BR;
+document.body.classList.add("m-" + MOD);
+const S = document.getElementById("stage");
+const BG = { la: "la_scene.jpg", ba: "ba_scene.jpg", ap: "ap_blast2.jpg" }[MOD];
+
+function sigil(size, small) {
+  return `<div class="sigil" style="width:${size}px;height:${size}px"><div class="halo" style="--s:${size}px"></div>${emblem(MOD, size, small)}</div>`;
+}
+
+/* engraved dial around a lens of radius R centred at (cx, cy) */
+function dial(cx, cy, R, band, opts) {
+  opts = opts || {};
+  const ro = R + band, size = (ro + 30) * 2, c = size / 2;
+  const col = { ba: "#e2b45a", la: "#e9d7ae", ap: "#e0584a" }[MOD];
+  let ticks = "";
+  for (let i = 0; i < 120; i++) {
+    const a = i * 3 * Math.PI / 180, major = i % 10 === 0, mid = i % 5 === 0;
+    const r1 = R + 4, r2 = R + 4 + (major ? band * .5 : mid ? band * .32 : band * .18);
+    ticks += `<line x1="${c + r1 * Math.cos(a)}" y1="${c + r1 * Math.sin(a)}" x2="${c + r2 * Math.cos(a)}" y2="${c + r2 * Math.sin(a)}" stroke="${col}" stroke-opacity="${major ? .9 : .45}" stroke-width="${major ? 2 : 1}"/>`;
+  }
+  const lr = R + band * .72, fs = Math.max(11, band * .31);
+  const words = opts.labels === false ? [] : M.ring;
+  const labels = words.map((w, i) => {
+    const a0 = (-90 + i * 90) - 40, a1 = a0 + 80;
+    const p = (a) => [c + lr * Math.cos(a * Math.PI / 180), c + lr * Math.sin(a * Math.PI / 180)];
+    const [x0, y0] = p(a0), [x1, y1] = p(a1);
+    const d = i === 2 ? `M${x1} ${y1} A${lr} ${lr} 0 0 0 ${x0} ${y0}` : `M${x0} ${y0} A${lr} ${lr} 0 0 1 ${x1} ${y1}`;
+    return `<path id="lp${i}" d="${d}" fill="none"/>
+      <text font-family="Alegreya Sans SC" font-weight="700" font-size="${fs}" letter-spacing="${fs * .3}" fill="${col}" fill-opacity=".85"><textPath href="#lp${i}" startOffset="50%" text-anchor="middle">${w.toLowerCase()}</textPath></text>
+      <circle cx="${p(a0 + 80 + 5)[0]}" cy="${p(a0 + 85)[1]}" r="${fs * .18}" fill="${col}"/>`;
+  }).join("");
+  const dash = M.private ? `stroke-dasharray="${band * .3} ${band * .18}"` : "";
+  return `<svg class="dial" width="${size}" height="${size}" style="left:${cx - c}px;top:${cy - c}px" viewBox="0 0 ${size} ${size}">
+    <circle cx="${c}" cy="${c}" r="${R + band / 2}" fill="none" stroke="rgba(12,9,7,.92)" stroke-width="${band}"/>
+    <circle cx="${c}" cy="${c}" r="${R + 1}" fill="none" stroke="${col}" stroke-width="2.5"/>
+    <circle cx="${c}" cy="${c}" r="${ro}" fill="none" stroke="${col}" stroke-opacity=".8" stroke-width="1.5"/>
+    ${MOD === "la" ? "" : `<circle cx="${c}" cy="${c}" r="${ro + 12}" fill="none" stroke="${col}" stroke-opacity=".55" stroke-width="${M.private ? 3 : 1}" ${dash}/>`}
+    ${ticks}${labels}</svg>` +
+    (MOD === "la" ? `<div class="prismring" style="left:${cx - ro - 16}px;top:${cy - ro - 16}px;width:${(ro + 16) * 2}px;height:${(ro + 16) * 2}px;--ri:${ro + 9}px;--ro:${ro + 15}px"></div>` : "");
+}
+
+/* lens contents per mod */
+function lensInner(D) {
+  if (MOD === "la") return `<img src="assets/la_minimap.png" style="transform:scale(1.02)">`;
+  if (MOD === "ap") {
+    const k = D / 760;
+    return `<img src="assets/ap_lens.jpg">
+      <svg class="abs" style="inset:0" viewBox="0 0 760 760" width="${D}" height="${D}">
+        <g stroke="#ff8f80" stroke-opacity=".75" fill="none">
+          <circle cx="380" cy="380" r="120" stroke-dasharray="6 8"/><circle cx="380" cy="380" r="230" stroke-dasharray="2 10" stroke-opacity=".5"/>
+          <line x1="380" y1="40" x2="380" y2="250"/><line x1="380" y1="510" x2="380" y2="720"/><line x1="40" y1="380" x2="250" y2="380"/><line x1="510" y1="380" x2="720" y2="380"/>
+          <path d="M300 300 h-26 v26 M460 300 h26 v26 M300 460 h-26 v-26 M460 460 h26 v-26" stroke-width="3" stroke-opacity=".95"/>
+        </g>
+        <g font-family="IBM Plex Mono" font-size="17" font-weight="600" fill="#ffd2c9" stroke="#000" stroke-width="4" stroke-opacity=".8" paint-order="stroke">
+          <text x="470" y="560">BLAST  R10</text><text x="470" y="582" fill="#8fe39a">fcast ok</text>
+          <text x="150" y="490" fill="#c9c2b6">zhalk 15 · flayer 19</text><text x="150" y="512" fill="#ffcf7a">both DIED 340.4</text>
+        </g></svg>`;
+  }
+  // ba: the level 1-12 plan as a rising constellation over Astarion's scene
+  const pts = [[120, 560], [170, 525], [215, 548], [262, 500], [305, 462], [355, 478], [398, 430], [440, 392], [490, 340], [525, 290], [560, 248], [590, 195]];
+  const lab = { 1: "Ranger", 3: "Gloom Stalker", 6: "Fighter", 8: "Battle Master", 9: "Rogue · Expertise", 11: "Thief", 12: "" };
+  const cur = 9;
+  let path = pts.map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ");
+  const nodes = pts.map((p, i) => {
+    const lv = i + 1;
+    if (lv === cur) return `<g transform="translate(${p[0]} ${p[1]})"><circle r="34" fill="rgba(255,204,77,.18)"/><path d="M0 -26 Q4 -4 26 0 Q4 4 0 26 Q-4 4 -26 0 Q-4 -4 0 -26Z" fill="#ffd77a" stroke="#3a2608" stroke-width="1.5"/></g>`;
+    return `<circle cx="${p[0]}" cy="${p[1]}" r="${lv < cur ? 7 : 7.5}" fill="${lv < cur ? "#c99a4c" : "#0c0a08"}" stroke="#e2b45a" stroke-width="2"/>`;
+  }).join("");
+  const labels = Object.entries(lab).map(([lv, t]) => {
+    const p = pts[lv - 1], on = +lv === cur;
+    const dx = on ? -42 : 14, dy = on ? 9 : 26;
+    return `<text x="${p[0] + dx}" y="${p[1] + dy}" font-size="${on ? 28 : 20}" ${on ? 'fill="#ffd77a" text-anchor="end"' : ""}>${lv}${t ? " · " + t : ""}</text>`;
+  }).join("");
+  return `<img src="assets/ba_scene.jpg" style="object-position:62% 50%;filter:brightness(.5) saturate(.85)">
+    <svg class="abs const" style="inset:0" viewBox="0 0 760 760" width="${D}" height="${D}">
+      <path d="${path}" fill="none" stroke="#e2b45a" stroke-opacity=".75" stroke-width="2.5"/>
+      <path d="M${pts.slice(cur - 1).map(p => p.join(" ")).join(" L")}" fill="none" stroke="#0c0a08" stroke-width="3" stroke-dasharray="1 9" stroke-linecap="round"/>
+      ${nodes}${labels}
+      <text class="cls" x="380" y="640" font-size="17" text-anchor="middle">level 1 → 12 · the plan</text>
+    </svg>`;
+}
+function lens(cx, cy, D, band, opts) {
+  return `<div class="lens" style="left:${cx - D / 2}px;top:${cy - D / 2}px;width:${D}px;height:${D}px">${lensInner(D)}</div>` + dial(cx, cy, D / 2, band, opts);
+}
+
+const L = {
+  banner() {
+    S.innerHTML = `<div class="bgimg" style="background-image:url(assets/${BG})"></div>` +
+      lens(1365, 540, 740, 54) +
+      `<div class="abs" style="left:130px;top:0;bottom:0;width:740px;display:flex;flex-direction:column;justify-content:center">
+        ${sigil(130)}
+        <div class="eyebrow" style="font-size:19px;margin:46px 0 22px">${M.eyebrow}</div>
+        <div class="title" style="font-size:${MOD === "ap" ? 104 : 112}px">${M.name.replace(" ", "<br>")}</div>
+        <div class="rule" style="width:420px;margin:34px 0 28px"></div>
+        <div class="tag" style="font-size:44px;line-height:1.15">${M.tag}</div>
+        <ul class="feats" style="font-size:25px;margin-top:26px">${M.feats.map(f => `<li>${f}</li>`).join("")}</ul>
+        ${M.private ? `<div style="margin-top:34px"><span class="stamp dashed" style="--fs:18px">Private tool · not released</span></div>` : ""}
+      </div>`;
+  },
+  thumb() {
+    S.innerHTML = `<div class="bgimg" style="background-image:url(assets/${BG})"></div>` +
+      lens(512, 400, 540, 44) +
+      `<div class="abs" style="left:0;right:0;top:${M.private ? 738 : 760}px;display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div style="display:flex;align-items:center;gap:26px">${sigil(84)}<div class="title" style="font-size:${MOD === "ap" ? 84 : 70}px;white-space:nowrap">${M.name}</div></div>
+        <div class="rule" style="width:360px;margin:22px 0 18px;background:linear-gradient(90deg,transparent,var(--id),transparent)"></div>
+        <div class="tag" style="font-size:36px">${M.tag}</div>
+        ${M.private ? `<div style="margin-top:16px"><span class="stamp dashed" style="--fs:17px">Private tool · not released</span></div>` : ""}
+      </div>`;
+    if (MOD === "la") S.querySelector(".rule").style.background = "linear-gradient(90deg,transparent,#ff4d4d,#f5f54d,#4dff88,#4dd2ff,#d24dff,transparent)";
+  },
+  docs() {
+    S.innerHTML = `<div class="bgimg" style="background-image:url(assets/${BG})"></div>` +
+      lens(1340, 200, 620, 48) +
+      `<div class="abs" style="left:80px;top:0;bottom:0;display:flex;align-items:center;gap:42px">${sigil(118)}
+        <div><div class="eyebrow" style="font-size:15px;margin-bottom:14px">${M.eyebrow}</div>
+        <div class="title" style="font-size:74px;white-space:nowrap">${M.name}</div>
+        <div class="rule" style="width:340px;margin:18px 0 14px"></div>
+        <div class="tag" style="font-size:32px">${M.tag}</div>
+        ${M.private ? `<div style="margin-top:12px"><span class="stamp dashed" style="--fs:14px">Private tool · not released</span></div>` : ""}</div></div>`;
+  },
+  sets() {
+    S.innerHTML = `<div class="bgimg" style="background-image:url(assets/la_scene.jpg)"></div>` +
+      lens(1250, 120, 440, 40, { labels: false }) +
+      `<div class="abs" style="left:56px;top:0;bottom:0;display:flex;align-items:center;gap:32px">${sigil(96)}
+        <div><div class="eyebrow" style="font-size:14px;margin-bottom:8px">Loot Advisor</div>
+        <div class="title" style="font-size:58px;white-space:nowrap">Synergy Sets</div>
+        <div class="tag" style="font-size:25px;margin-top:6px">Full loadouts for your build · follows your game live</div></div></div>`;
+  },
+  mark(small) {
+    document.body.classList.add("transparent"); S.style.background = "none"; S.classList.remove("grain");
+    const n = small ? 64 : 128, e = small ? 56 : 108;
+    S.innerHTML = `<div class="abs" style="left:${(n - e) / 2}px;top:${(n - e) / 2}px">${sigil(e, small)}</div>`;
+    const h = S.querySelector(".halo"); h.style.cssText = `width:${n}px;height:${n}px;opacity:${small ? .5 : .65};background:radial-gradient(closest-side, var(--id-glow), transparent)`;
+    if (MOD === "la") h.style.background = "radial-gradient(closest-side, rgba(255,240,200,.35), rgba(170,120,255,.15) 55%, transparent)";
+  },
+  marksm() { L.mark(true); },
+  wordmark() {
+    document.body.classList.add("transparent"); S.style.background = "none"; S.classList.remove("grain");
+    S.innerHTML = `<div class="abs" style="left:2px;top:6px;display:flex;align-items:center;gap:9px">${sigil(52, true)}
+      <div class="title" id="wm" style="font-size:25px;letter-spacing:.04em;filter:drop-shadow(0 1px 1px rgba(0,0,0,.95)) drop-shadow(0 0 3px rgba(0,0,0,.8));white-space:nowrap">${M.name}</div></div>`;
+    const h = S.querySelector(".halo"); h.style.cssText = `width:62px;height:62px;opacity:.45;background:radial-gradient(closest-side, var(--id-glow), transparent)`;
+    if (MOD === "la") h.style.background = "radial-gradient(closest-side, rgba(255,240,200,.35), rgba(170,120,255,.15) 55%, transparent)";
+    window.__fit = () => { const wm = document.getElementById("wm"); let fs = 25;
+      while (wm.getBoundingClientRect().right > 253 && fs > 12) { fs -= .5; wm.style.fontSize = fs + "px"; } };
+  },
+};
+(L[FMT] || L.banner)();
+BR.ready(window.__fit);
+</script>
+</body>
+</html>

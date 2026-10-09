@@ -1,0 +1,3 @@
+-- Build Advisor has no server-side code: it runs entirely on the client (UI + read-only inspection of the
+-- character creation / respec / level-up state). The play-testing scanner and autopilot that used to be
+-- loaded here now live in the separate "Autopilot" mod (Mods/Autopilot).

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Option 3 - Cinematic</title>
+<!-- Option 3 "Cinematic": a real game scene bleeds in from the right and fades to black; Cormorant Garamond title low on
+     the left like a film card; one piece of the mod's own UI floats over the dark side. Marks are round medallions. -->
+<link rel="stylesheet" href="common.css">
+<style>
+  .stage { position: absolute; inset: 0; overflow: hidden; background: #070605; }
+  .scene { position: absolute; top: 0; bottom: 0; right: 0; overflow: hidden; }
+  .scene img { width: 100%; height: 100%; object-fit: cover; }
+  .scene::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(90deg, #070605 0%, rgba(7,6,5,.85) 18%, rgba(7,6,5,.25) 45%, rgba(7,6,5,0) 70%),
+                linear-gradient(0deg, rgba(7,6,5,.85) 0%, rgba(7,6,5,0) 35%),
+                radial-gradient(ellipse at 70% 40%, transparent 50%, rgba(0,0,0,.45)); }
+  .thumbscene::after { background: linear-gradient(0deg, #070605 0%, rgba(7,6,5,.88) 30%, rgba(7,6,5,0) 62%), radial-gradient(ellipse at 60% 35%, transparent 45%, rgba(0,0,0,.55)) !important; }
+  .eyebrow { font-family: "Alegreya Sans SC", sans-serif; font-weight: 700; letter-spacing: .28em; color: #b3a487; text-transform: lowercase; }
+  .title { font-family: "Cormorant Garamond", serif; font-weight: 600; line-height: .92; letter-spacing: -.005em; color: #f4ead6;
+    text-shadow: 0 4px 30px rgba(0,0,0,.8); }
+  .tag { font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500; color: #e2d6be; text-shadow: 0 2px 12px rgba(0,0,0,.9); }
+  .hair { height: 3px; width: 140px; background: var(--id); }
+  .m-la .hair { background: var(--prism-lin); }
+  .m-ap .hair { background: repeating-linear-gradient(90deg, #e0584a 0 14px, transparent 14px 22px); }
+  .abs { position: absolute; }
+  .float { position: absolute; box-shadow: 0 40px 90px rgba(0,0,0,.8); }
+  .glass { background: rgba(14, 10, 9, .82); border: 1px solid rgba(224, 88, 74, .5); padding: 18px 24px; backdrop-filter: blur(6px); }
+  .glass .hd { font-family: "Alegreya Sans SC", sans-serif; font-weight: 700; letter-spacing: .2em; color: #e0584a; font-size: .8em; margin-bottom: .6em; text-transform: lowercase; }
+  .mag { position: absolute; border-radius: 50%; overflow: hidden; border: 3px solid transparent;
+    background: linear-gradient(#000, #000) padding-box, var(--prism) border-box; box-shadow: 0 0 0 8px rgba(7,6,5,.85), 0 40px 90px rgba(0,0,0,.85); }
+  .mag img { width: 100%; height: 100%; object-fit: cover; }
+  .cap { font-family: "Alegreya Sans SC", sans-serif; font-weight: 700; letter-spacing: .18em; color: #b3a487; text-transform: lowercase; }
+  .cap b { color: #f4ead6; font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 1.45em; display: block; margin-top: .15em; }
+  /* medallion mark */
+  .med { position: relative; width: var(--d); height: var(--d); border-radius: 50%; padding: calc(var(--d) * var(--rw, .075)); background: var(--id-ring); flex: none; }
+  .m-ap .med { background: repeating-conic-gradient(from 4deg, #ee6a5a 0 12deg, transparent 12deg 18deg); }
+  .med .in { width: 100%; height: 100%; border-radius: 50%; display: grid; place-items: center; position: relative;
+    background: radial-gradient(circle at 50% 35%, #2c231a, #0e0b08 72%); box-shadow: inset 0 0 0 calc(var(--d) * .015) rgba(0,0,0,.9), inset 0 calc(var(--d) * .04) calc(var(--d) * .1) rgba(0,0,0,.6); }
+  .m-ap .med .in { background: radial-gradient(circle at 50% 35%, #331915, #0e0706 72%); }
+  .m-ap .med .in i { background: #e0584a; }
+  .med .in span { font-family: "Cormorant Garamond", serif; font-weight: 700; color: #f6ecd8; font-size: calc(var(--d) * var(--mf, .42)); letter-spacing: -.02em; line-height: 1;
+    transform: translateY(-4%); text-shadow: 0 calc(var(--d) * .015) 0 rgba(0,0,0,.8); }
+  .m-ba .med .in span { color: #ffe6a6; }
+  .m-ap .med .in span { color: #ffc2b6; }
+  .med .in i { position: absolute; left: 50%; bottom: 13%; transform: translateX(-50%); width: calc(var(--d) * .2); height: calc(var(--d) * .025); border-radius: 2px; background: var(--id-ring); }
+</style>
+</head>
+<body>
+<div class="stage grain" id="stage"></div>
+<script src="common.js"></script>
+<script>
+const { MOD, FMT, M, baWindow, baMenu, apLog } = BR;
+document.body.classList.add("m-" + MOD);
+const S = document.getElementById("stage");
+const SCENE = { la: ["la_wide.jpg", "70% 30%"], ba: ["ba_scene.jpg", "100% 50%"], ap: ["ap_blast1.jpg", "80% 40%"] }[MOD];
+
+function med(d, small) {
+  return `<div class="med" style="--d:${d}px;${small ? "--rw:.11;--mf:.5" : ""}"><div class="in"><span>${M.mono}</span>${small ? "" : "<i></i>"}</div></div>`;
+}
+function scene(left, pos, filter) {
+  return `<div class="scene" style="left:${left}px"><img src="assets/${SCENE[0]}" style="object-position:${pos || SCENE[1]};${filter || ""}"></div>`;
+}
+function titleBlock(o) {
+  return `<div class="abs" style="left:${o.x}px;${o.bottom != null ? `bottom:${o.bottom}px` : `top:${o.y}px`};width:${o.w}px">
+    <div style="display:flex;align-items:center;gap:${o.eb}px;margin-bottom:${o.eb * 1.3}px">${med(o.eb * 3.2)}<div class="eyebrow" style="font-size:${o.eb}px">${M.eyebrow}</div></div>
+    <div class="title" style="font-size:${o.t}px;white-space:nowrap">${M.name}</div>
+    <div class="hair" style="margin:${o.t * .2}px 0 ${o.t * .17}px"></div>
+    <div class="tag" style="font-size:${o.tg}px;line-height:1.2">${M.tag}</div>
+    ${M.private ? `<div style="margin-top:${o.tg * .7}px"><span class="stamp dashed" style="--fs:${o.tg * .45}px">Private tool · not released</span></div>` : ""}
+  </div>`;
+}
+/* the floating piece of the mod's own UI */
+function overlay(x, y, k) {
+  const P = v => Math.round(v * k);
+  if (MOD === "la") return `<div class="mag" style="left:${x}px;top:${y}px;width:${P(340)}px;height:${P(340)}px"><img src="assets/la_cell.png"></div>
+    <div class="abs cap" style="left:${x}px;top:${y + P(370)}px;font-size:${P(17)}px;width:${P(520)}px">rainbow frame · in your inventory<b>Bhaalist Gloves — best Gloves for Astarion, Act 3</b></div>`;
+  if (MOD === "ba") return `<div class="float clip" data-from=".sept" style="left:${x}px;top:${y}px;width:${P(620)}px;height:${P(430)}px;overflow:hidden"><div>${baWindow({ fs: 16 * k, w: 620 * k, compact: true, planFrom: 8 })}</div></div>`;
+  return `<div class="float glass" style="left:${x}px;top:${y}px;font-size:${P(16)}px"><div class="hd">engine log · helm run</div>${apLog({ fs: 15.5 * k, lines: BR.APLOG.slice(1, 6) })}</div>`;
+}
+
+const L = {
+  banner() {
+    S.innerHTML = scene(MOD === "ba" ? 520 : 560) +
+      overlay(130, MOD === "ba" ? 76 : 100, MOD === "ba" ? 1.16 : 1) +
+      titleBlock({ x: 130, bottom: MOD === "ap" ? 96 : 110, w: 1100, eb: 19, t: 150, tg: 44 });
+  },
+  thumb() {
+    S.innerHTML = `<div class="scene" style="left:0"><img src="assets/${SCENE[0]}" style="object-position:${{ la: "62% 30%", ba: "72% 40%", ap: "75% 40%" }[MOD]}"></div>` +
+      (MOD === "la" ? `<div class="mag" style="left:70px;top:80px;width:260px;height:260px"><img src="assets/la_cell.png"></div>` :
+       MOD === "ba" ? `<div class="float clip" data-from=".sept" style="left:60px;top:60px;width:580px;height:410px;overflow:hidden"><div>${baWindow({ fs: 16, w: 580, compact: true, planFrom: 8 })}</div></div>` :
+       `<div class="float glass" style="left:60px;top:70px;font-size:15px"><div class="hd">engine log · helm run</div>${apLog({ fs: 15, lines: BR.APLOG.slice(2, 6) })}</div>`) +
+      titleBlock({ x: 70, bottom: 70, w: 900, eb: 16, t: MOD === "ap" ? 132 : 116, tg: 38 });
+    S.querySelector(".scene").classList.add("thumbscene");
+  },
+  docs() {
+    S.innerHTML = scene(560, { la: "60% 22%", ba: "100% 45%", ap: "80% 45%" }[MOD]) +
+      `<div class="abs" style="left:80px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">${med(52)}<div class="eyebrow" style="font-size:15px">${M.eyebrow}</div></div>
+        <div class="title" style="font-size:104px;white-space:nowrap">${M.name}</div>
+        <div class="hair" style="margin:16px 0 14px"></div>
+        <div class="tag" style="font-size:32px">${M.tag}</div>
+        ${M.private ? `<div style="margin-top:14px"><span class="stamp dashed" style="--fs:14px">Private tool · not released</span></div>` : ""}</div>` +
+      (MOD === "la" ? `<div class="mag" style="left:1290px;top:70px;width:250px;height:250px"><img src="assets/la_cell.png"></div>` :
+       MOD === "ap" ? "" :
+       `<div class="float clip" data-from=".sept" data-idx="1" style="left:1070px;top:40px;width:480px;height:320px;overflow:hidden"><div>${baWindow({ fs: 15, w: 480, compact: true, planFrom: 8 })}</div></div>`);
+  },
+  sets() {
+    S.innerHTML = `<div class="scene" style="left:620px"><img src="assets/la_wide.jpg" style="object-position:55% 38%"></div>` +
+      `<div class="abs" style="left:60px;top:0;bottom:0;display:flex;align-items:center;gap:28px">${med(118)}
+        <div><div class="eyebrow" style="font-size:14px;margin-bottom:6px">Loot Advisor</div>
+        <div class="title" style="font-size:78px;white-space:nowrap">Synergy Sets</div>
+        <div class="tag" style="font-size:25px;margin-top:6px">Full loadouts for your build · follows your game live</div></div></div>`;
+  },
+  mark(small) {
+    document.body.classList.add("transparent"); S.style.background = "none"; S.classList.remove("grain");
+    const n = small ? 64 : 128, d = small ? 60 : 120;
+    S.innerHTML = `<div class="abs" style="left:${(n - d) / 2}px;top:${(n - d) / 2}px">${med(d, small)}</div>`;
+  },
+  marksm() { L.mark(true); },
+  wordmark() {
+    document.body.classList.add("transparent"); S.style.background = "none"; S.classList.remove("grain");
+    S.innerHTML = `<div class="abs" style="left:3px;top:5px;display:flex;align-items:center;gap:10px">${med(54, true)}
+      <div class="title" id="wm" style="font-size:36px;font-weight:700;text-shadow:0 1px 1px #000,0 0 4px rgba(0,0,0,.9);white-space:nowrap">${M.name}</div></div>`;
+    window.__fit = () => { const wm = document.getElementById("wm"); let fs = 36;
+      while (wm.getBoundingClientRect().right > 253 && fs > 12) { fs -= .5; wm.style.fontSize = fs + "px"; } };
+  },
+};
+(L[FMT] || L.banner)();
+BR.ready(window.__fit);
+</script>
+</body>
+</html>

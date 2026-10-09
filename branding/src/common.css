@@ -1,0 +1,109 @@
+/* Shared by option1/2/3.html: palette, fonts, emblems and the in-game mock-ups (Build Advisor window, Autopilot log). */
+@import url("https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Alegreya+SC:wght@500;700;800&family=Alegreya+Sans+SC:wght@500;700&family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=IBM+Plex+Mono:wght@400;500;600&display=block");
+
+:root {
+  --ink: #efe4cc;          /* ivory text */
+  --ink-2: #c4b79f;
+  --ink-3: #8f8577;
+  --bg: #0c0a08;
+  --bg-2: #15110d;
+  --panel: #1e1a16;        /* the game's dark window panel */
+  --rule: #5b4a33;         /* hairline gold-brown */
+  --gold: #d9ae62;
+  --gold-hi: #f6dc9c;
+  --prism: conic-gradient(from 45deg, #ff4d4d, #ffb84d, #f5f54d, #4dff88, #4dd2ff, #6b6bff, #d24dff, #ff4d4d);
+  --prism-lin: linear-gradient(90deg, #ff4d4d, #ffb84d, #f5f54d, #4dff88, #4dd2ff, #6b6bff, #d24dff);
+  /* game text colours used by the mods' windows (Window.lua) */
+  --g-green: #73ff73; --g-red: #ff7373; --g-gold: #ffcc4d; --g-grey: #b3b3b3;
+}
+/* identity colour per mod */
+.m-ba { --id: #e2b45a; --id-hi: #ffe6a6; --id-lo: #8a5f1c; --id-glow: rgba(255, 196, 92, .55); --id-ring: linear-gradient(135deg, #fff0c4, #e2b45a 40%, #8a5f1c 75%, #e9c477); }
+.m-la { --id: #f0d9a6; --id-hi: #fff4d6; --id-lo: #7a5a2a; --id-glow: rgba(255, 255, 255, .35); --id-ring: var(--prism); }
+.m-ap { --id: #e0584a; --id-hi: #ffb3a6; --id-lo: #7a1f19; --id-glow: rgba(240, 80, 60, .55); --id-ring: linear-gradient(135deg, #ffb3a6, #e0584a 45%, #7a1f19 80%, #e0584a); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body { background: var(--bg); color: var(--ink); font-family: "Alegreya", "Palatino Linotype", Georgia, serif; -webkit-font-smoothing: antialiased; }
+body.transparent { background: transparent; }
+img { display: block; }
+
+.grain::after { /* film grain so flat darks don't band */
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* ---------------- emblems (all scale with --s, the emblem's box size) ---------------- */
+.emb { position: relative; width: var(--s); height: var(--s); flex: none; }
+.emb svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+/* Loot Advisor gem: gold rim, prism core, facets */
+.gem { position: absolute; inset: 14.6%; transform: rotate(45deg); }
+.gem .rim { position: absolute; inset: 0; background: linear-gradient(135deg, #fff3cf, #d9a64a 35%, #7a5320 60%, #f0cc7a 85%, #9c6c27); border-radius: 4%; box-shadow: 0 0 calc(var(--s) * .02) rgba(0,0,0,.8); }
+.gem .rim2 { position: absolute; inset: 7%; background: #1a120a; border-radius: 3%; }
+.gem .core { position: absolute; inset: 11%; background: conic-gradient(from 0deg, #ff4d4d, #ffb84d, #f5f54d, #4dff88, #4dd2ff, #6b6bff, #d24dff, #ff4d4d); border-radius: 2%; }
+.gem .facet { position: absolute; inset: 11%; border-radius: 2%;
+  background:
+    linear-gradient(45deg, transparent 49.2%, rgba(255,255,255,.55) 50%, transparent 50.8%),
+    linear-gradient(-45deg, transparent 49.2%, rgba(255,255,255,.55) 50%, transparent 50.8%),
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,.85), rgba(255,255,255,0) 32%),
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0) 40%, rgba(0,0,0,.35) 100%); }
+.gem .table { position: absolute; inset: 34%; border: calc(var(--s) * .012) solid rgba(255,255,255,.7); background: rgba(255,255,255,.12); }
+.emb.small .gem .rim2 { inset: 9%; }
+.emb.small .gem .core, .emb.small .gem .facet { inset: 14%; }
+.emb.small .gem .table { border-width: calc(var(--s) * .03); inset: 36%; }
+
+/* glows behind emblems */
+.halo { position: absolute; left: 50%; top: 50%; width: calc(var(--s) * 2.2); height: calc(var(--s) * 2.2); transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(circle, var(--id-glow), transparent 62%); pointer-events: none; }
+.m-la .halo { background: radial-gradient(circle, rgba(255,240,200,.32), rgba(170,120,255,.12) 38%, transparent 64%); }
+
+/* ---------------- Build Advisor window (rebuilt from Window.lua; Script Extender IMGUI look) ---------------- */
+.imgui { font-family: "Alegreya", "Palatino Linotype", serif; color: #e8e2d6; background: rgba(28, 22, 16, .94); border: 1px solid #5d4a30;
+  box-shadow: 0 30px 80px rgba(0,0,0,.65), 0 0 0 1px rgba(0,0,0,.6); font-size: var(--fs, 19px); line-height: 1.36; width: var(--w, 760px); overflow: hidden; }
+.imgui .tb { position: relative; z-index: 2; background: #3a2c1c; color: #e8e2d6; padding: .22em .6em; display: flex; align-items: center; gap: .5em; border-bottom: 1px solid #5d4a30; }
+.imgui .tb::before { content: "\25BC"; font-size: .7em; color: #cbbfa8; }
+.imgui .tb .x { margin-left: auto; color: #a99a80; }
+.imgui .bd { padding: .55em .8em .7em; }
+.imgui .grey { color: var(--g-grey); } .imgui .gold { color: var(--g-gold); } .imgui .green { color: var(--g-green); } .imgui .red { color: var(--g-red); }
+.imgui .combo { display: flex; gap: .6em; align-items: center; margin: .35em 0; }
+.imgui .combo .box { flex: 1; background: #2f2518; border: 1px solid #5d4a30; padding: .12em .5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; padding-right: 1.8em; }
+.imgui .combo .box::after { content: "\25BC"; position: absolute; right: 0; top: 0; bottom: 0; width: 1.5em; display: grid; place-items: center; background: #4a3822; font-size: .65em; }
+.imgui .cbs { display: flex; gap: 1.1em; margin: .3em 0 .45em; }
+.imgui .cb { display: flex; align-items: center; gap: .4em; }
+.imgui .cb i { width: .95em; height: .95em; background: #2f2518; border: 1px solid #5d4a30; display: grid; place-items: center; font-style: normal; font-size: .8em; color: #ffd27a; }
+.imgui .sep { height: 1px; background: #5d4a30; margin: .45em 0; }
+.imgui .sept { display: flex; align-items: center; gap: .6em; margin: .55em 0 .25em; color: #e8e2d6; }
+.imgui .sept::before { content: ""; width: 1.2em; height: 1px; background: #6d5838; }
+.imgui .sept::after { content: ""; flex: 1; height: 1px; background: #6d5838; }
+.imgui ul { list-style: none; }
+.imgui li { position: relative; padding-left: 1.15em; }
+.imgui li::before { content: ""; position: absolute; left: .3em; top: .62em; width: .32em; height: .32em; border-radius: 50%; background: currentColor; }
+.imgui .hdr { background: #3a2c1c; margin: .5em -.2em .2em; padding: .1em .5em; display: flex; gap: .5em; align-items: center; }
+.imgui .hdr::before { content: "\25BC"; font-size: .65em; color: #cbbfa8; }
+.imgui table { border-collapse: collapse; width: 100%; font-size: .93em; }
+.imgui td { border: 1px solid #4e3e28; padding: .02em .45em; vertical-align: top; }
+.imgui tr:nth-child(odd) td { background: rgba(255, 235, 200, .035); }
+.imgui tr.cur td { color: var(--g-gold); background: rgba(255, 204, 77, .08); }
+.imgui tr.past td { color: #8d8a84; }
+
+/* in-menu star chips (the game's font draws the mod's "*" as a small star) */
+.menu { font-family: "Alegreya", serif; background: linear-gradient(#211a13, #17120d); border: 1px solid #5d4a30; padding: .4em 0; width: var(--w, 300px); font-size: var(--fs, 22px);
+  box-shadow: 0 24px 60px rgba(0,0,0,.6); }
+.menu .it { padding: .28em .9em; color: #cfc6b8; display: flex; align-items: center; gap: .45em; }
+.menu .it.on { color: #fff; background: linear-gradient(90deg, rgba(226,180,90,.22), rgba(226,180,90,0)); box-shadow: inset 3px 0 0 #e2b45a; }
+.menu .star { color: #ffd98a; font-size: .8em; text-shadow: 0 0 8px rgba(255, 210, 120, .8); }
+.menu .lab { font-family: "Alegreya Sans SC", sans-serif; font-size: .6em; letter-spacing: .14em; color: #8f8577; padding: .2em .9em .35em; }
+
+/* ---------------- Autopilot engine log (real lines from tools/bg3drive/helmbot.log, attempt a165/a166) ---------------- */
+.log { font-family: "IBM Plex Mono", Consolas, monospace; font-size: var(--fs, 17px); line-height: 1.55; color: #c9c2b6; white-space: pre; }
+.log .t { color: #7d766c; }
+.log .k { color: #ff9a8a; }
+.log .ok { color: #8fe39a; }
+.log .d { color: #ffcf7a; }
+.log .c { color: #8fc7ff; }
+
+/* ---------------- private stamp ---------------- */
+.stamp { font-family: "IBM Plex Mono", monospace; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: #ff8f80;
+  border: 2px solid #e0584a; padding: .25em .7em .22em; font-size: var(--fs, 18px); background: rgba(120, 25, 20, .35); display: inline-block; }
+.stamp.dashed { border-style: dashed; }
+.tag { text-wrap: balance; }

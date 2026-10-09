@@ -1,0 +1,22 @@
+<ls:UIWidget x:Name="BuildAdvisorRes"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ls="clr-namespace:ls;assembly=Code"
+             IsHitTestVisible="False" ls:UIWidget.Focusable="False">
+    <!-- Build Advisor image holder. Never visible (Opacity 0). Its only job: make Noesis create our brushes from our
+         own textures (GUI/Assets/BuildAdvisor/*.DDS, listed in GUI/metadata.lsf); the client script reads them back
+         from the named Rectangles (Fill) and assigns them to the creation / level-up tiles and spell icons.
+         BA_Clear is the transparent brush that is put back when an outline is removed. -->
+    <ls:UIWidget.Resources>
+        <ImageBrush x:Key="BA.TileRing" ImageSource="pack://application:,,,/BuildAdvisor;component/Assets/BuildAdvisor/ba_tile_ring.png" Stretch="Fill"/>
+        <ImageBrush x:Key="BA.IconRing" ImageSource="pack://application:,,,/BuildAdvisor;component/Assets/BuildAdvisor/ba_icon_ring.png" Stretch="Fill"/>
+        <SolidColorBrush x:Key="BA.Clear" Color="Transparent"/>
+    </ls:UIWidget.Resources>
+
+    <Grid x:Name="BA_Holder" Opacity="0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="1" Height="1"
+          IsHitTestVisible="False">
+        <Rectangle x:Name="BA_TileRing" Fill="{StaticResource BA.TileRing}" Width="1" Height="1"/>
+        <Rectangle x:Name="BA_IconRing" Fill="{StaticResource BA.IconRing}" Width="1" Height="1"/>
+        <Rectangle x:Name="BA_Clear"    Fill="{StaticResource BA.Clear}"    Width="1" Height="1"/>
+    </Grid>
+</ls:UIWidget>

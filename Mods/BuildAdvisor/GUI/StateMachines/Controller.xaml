@@ -1,0 +1,50 @@
+<ls:StateMachine xmlns:ls="clr-namespace:ls;assembly=Code"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Build Advisor: adds one hidden widget (Pages/BuildAdvisorRes.xaml) to the character creation, level-up and
+         respec screens so that Noesis creates our outline brushes there. No game file is overridden: the four
+         screen states are only extended (ModType="Extend"), each with its own small sub-state. -->
+    <ls:StateMachine.States>
+        <ls:State Name="CharacterCreation" Layout="Player" Owner="Player" ModType="Extend">
+            <ls:State.InitialSubstates>
+                <ls:InitialSubstate Name="BuildAdvisorResCC"/>
+            </ls:State.InitialSubstates>
+        </ls:State>
+        <ls:State Name="CharacterLevelUp" Layout="Player" Owner="Player" ModType="Extend">
+            <ls:State.InitialSubstates>
+                <ls:InitialSubstate Name="BuildAdvisorResLU"/>
+            </ls:State.InitialSubstates>
+        </ls:State>
+        <ls:State Name="CharacterRespec" Layout="Player" Owner="Player" ModType="Extend">
+            <ls:State.InitialSubstates>
+                <ls:InitialSubstate Name="BuildAdvisorResRS"/>
+            </ls:State.InitialSubstates>
+        </ls:State>
+        <ls:State Name="CharacterFullRespec" Layout="Player" Owner="Player" ModType="Extend">
+            <ls:State.InitialSubstates>
+                <ls:InitialSubstate Name="BuildAdvisorResFR"/>
+            </ls:State.InitialSubstates>
+        </ls:State>
+
+        <ls:State Name="BuildAdvisorResCC" Layout="Player" Owner="Player">
+            <ls:State.Widgets>
+                <ls:StateWidget Filename="BuildAdvisorRes.xaml" Layer="HUD" IgnoreHitTest="True"/>
+            </ls:State.Widgets>
+        </ls:State>
+        <ls:State Name="BuildAdvisorResLU" Layout="Player" Owner="Player">
+            <ls:State.Widgets>
+                <ls:StateWidget Filename="BuildAdvisorRes.xaml" Layer="HUD" IgnoreHitTest="True"/>
+            </ls:State.Widgets>
+        </ls:State>
+        <ls:State Name="BuildAdvisorResRS" Layout="Player" Owner="Player">
+            <ls:State.Widgets>
+                <ls:StateWidget Filename="BuildAdvisorRes.xaml" Layer="HUD" IgnoreHitTest="True"/>
+            </ls:State.Widgets>
+        </ls:State>
+        <ls:State Name="BuildAdvisorResFR" Layout="Player" Owner="Player">
+            <ls:State.Widgets>
+                <ls:StateWidget Filename="BuildAdvisorRes.xaml" Layer="HUD" IgnoreHitTest="True"/>
+            </ls:State.Widgets>
+        </ls:State>
+    </ls:StateMachine.States>
+</ls:StateMachine>
