@@ -46,7 +46,7 @@ MODS = {
 
 SE_URL = "https://github.com/Norbyte/bg3se"
 BG3MM_URL = "https://github.com/LaughingLeader/BG3ModManager"
-# PENDING: the label of the F6 window's Sets page button (the mod change is in progress; confirm the exact text)
+# the F6 window's Sets page button (Client/Window.lua): it shows the page's path, ready to copy
 SETS_BUTTON = "Open Sets page"
 
 # ------------------------------------------------------------------------------------------------ rewrite rules
@@ -66,16 +66,12 @@ RULES = [
      "had the least testing. If one looks wrong, untick <i>Highlight in game menus</i>; the window still shows the "
      "plan.</li>"),
     # --- Loot Advisor
-    ("LootAdvisor", r'<span class="lbl">Map label \(new layout\)</span>', '<span class="lbl">Map label</span>'),
     ("LootAdvisor", r' \(planned, see the <a href="#roadmap">Roadmap</a>\)', " (planned)"),
     ("LootAdvisor", r"Before release: scoring every item", "How the advice was made: scoring every item"),
     ("LootAdvisor", r"<b>Community consensus\.</b>", "<b>Community picks.</b>"),
     ("LootAdvisor", r">Settings and the dev toggle<", ">Settings<"),
     ("LootAdvisor", r"\s*<tr><td><code>Dev</code></td>.*?</tr>", ""),
     ("LootAdvisor", r'\s*<div class="note">\s*<p><b>Dev toggle:.*?</div>', ""),
-    ("LootAdvisor", r"\s*<li><b>Not yet checked in the game:</b>.*?</li>", ""),
-    ("LootAdvisor", r"The list for the Dark Urge in Act 3, Baldur's Gate: 29 items, 8 marked on the map\.",
-     "The list for the Dark Urge in Act 3, Baldur's Gate: 29 items, 2 marked on the map, the nearest six on top."),
     # --- both: pills that only make sense to the developer
     (None, r'\s*<span class="pill (?:unv|plan)">[^<]*</span>', ""),
 ]
@@ -85,8 +81,6 @@ RULES = [
 FIGURES = {
     "Enlarge: item frames": {"cover": [(0, 0, 1000, 62), (0, 283, 1000, 311)]},      # internal labels in the image
     "Enlarge: map markers compared": {"cover": [(0, 0, 1100, 33)]},                   # old internal mod name
-    "Enlarge: item list window": {"media": ("LootAdvisor", "Screenshot_5_item_list_F6.jpg"),
-                                  "crop": (384, 112, 2072, 1146), "width": 1400},     # old shot shows a save's name
     "Enlarge: not covered message": {"drop": True},                                   # old mod name, a hireling name
     "Enlarge: legend": {"drop": True, "keep_caption": True},                          # old shot shows a save's name
     "Enlarge: Sets page": {"drop": True},                                             # save's name; page redesigned
@@ -196,7 +190,7 @@ def shared_chapter(mod):
         view = """
       <h3 id="sets-view">Viewing the Sets page next to the game</h3>
       <ul class="prose">
-        <li><b>From the game:</b> press <kbd>F6</kbd>, then <b>%(btn)s</b> in the item list. Or open your bookmark of the page (load a save once first; the mod writes the page then).</li>
+        <li><b>From the game:</b> press <kbd>F6</kbd>, then <b>%(btn)s</b> in the item list: click the path it shows, press <kbd>Ctrl</kbd>+<kbd>C</kbd> and paste it into your browser's address bar. Or open your bookmark of the page (load a save once first; the mod writes the page then).</li>
         <li><b>Two monitors:</b> play in <i>Borderless Window</i> (the game's Video settings) and keep the browser on the second monitor. The page follows the game by itself.</li>
         <li><b>One monitor:</b> open the Steam overlay browser (<kbd>Shift</kbd>+<kbd>Tab</kbd>, then the web browser) and open the page there, or switch to your browser with <kbd>Alt</kbd>+<kbd>Tab</kbd> (smoothest in <i>Borderless Window</i>).</li>
       </ul>""" % {"btn": SETS_BUTTON}
