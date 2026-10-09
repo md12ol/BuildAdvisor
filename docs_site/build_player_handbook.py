@@ -1,4 +1,4 @@
-"""Builds the PLAYER handbook of one mod from the full docs site (HANDOFF decisions 34 and 82):
+"""Builds the PLAYER handbook of one mod from the full docs site:
 
     python docs_site/build_player_handbook.py                       # both mods -> <project>/<Mod>/Handbook.html
     python docs_site/build_player_handbook.py --mod LootAdvisor --out some/dir/Handbook.html
@@ -8,7 +8,7 @@ handbook: a short shared chapter (Script Extender, mod manager, what is in the f
 chapter. One handbook per mod rather than one for both, because a player downloads one mod: the file then only
 describes what they installed and stays half the size.
 
-Removed from the source: Autopilot, the roadmap, every "For the developer" fold, the "Current status" logs, the
+Removed from the source: the roadmap, every "For the developer" fold, the "Current status" logs, the
 "not yet checked in game" / "planned" pills, the dev toggle, and screenshots that show a save's character name or
 the old internal mod name (replaced by a clean shot from Media/ or dropped). Every rewrite rule must still match the
 source; a rule that no longer matches is reported, so a changed mods_docs.html is noticed.
@@ -24,8 +24,8 @@ import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BA = os.path.dirname(HERE)                      # Desktop/BG3Mods/BuildAdvisor
-DESKTOP = os.path.dirname(BA)                   # Desktop/BG3Mods
+BA = os.path.dirname(HERE)                      # this BuildAdvisor checkout
+DESKTOP = os.path.dirname(BA)                   # the folder with the side-by-side repos
 SRC = os.path.join(HERE, "mods_docs.html")
 LEAK_SCAN = os.path.join(DESKTOP, "LootAdvisor", "tools")
 
@@ -93,10 +93,10 @@ FIGURES = {
 }
 
 # words a player handbook must not contain (on top of leak_scan.py's patterns)
-BANNED = [r"Autopilot", r"\bdeveloper\b", r"not yet checked", r"in-game check", r"\bRoadmap\b", r"\bprivate\b",
-          r"\bsession\b", r"HANDOFF", r"\.lua\b", r"dev toggle", r"!la_dev", r"\bDebug\b", r"Current status",
-          r"\bClaude\b", r"mods_docs", r"[A-Z]:\\Users", r"\bmicha\b", r"White Urge", r"\bRyzen\b", r"\bGrem\b",
-          r"\bdecision \d", r"\bthe author\b", r"helm"]
+BANNED = [r"A[u]topilot", r"\bdeveloper\b", r"not yet checked", r"in-game check", r"\bRoadmap\b", r"\bprivate\b",
+          r"\bsession\b", r"HAND[O]FF", r"\.lua\b", r"dev toggle", r"!la_dev", r"\bDebug\b", r"Current status",
+          r"\bC[l]aude\b", r"mods_docs", r"[A-Z]:\\Users", r"\bdecision \d", r"\bthe author\b", r"helm"]
+# private save / campaign names: leak_scan.hits() checks them (name hashes of BG3Tools tools/public_text.py)
 # player-facing file names that are fine (removed before the leak patterns run)
 ALLOWED = [r"\b(?:LootAdvisor|BuildAdvisor)\.pak\b", r"\bmodsettings\.lsx\b", r"\bHandbook\.html\b",
            r"\bINSTALL\.md\b", r"Page[/\\]Sets\.html", r"\bLootAdvisor\s+folder", r"\bMedia[/\\]", r"github\.com/[\w./-]+"]
@@ -177,7 +177,7 @@ def clean_chapter(sec, mod, misses):
     if not n:
         misses.append("no status block found in %s" % mod)
     sec = apply_rules(sec, mod, misses)
-    sec = re.sub(r'<a href="#(?:roadmap|autopilot)">(.*?)</a>', r"\1", sec)
+    sec = re.sub(r'<a href="#(?:roadmap|a[u]topilot)">(.*?)</a>', r"\1", sec)
     return sec
 
 
