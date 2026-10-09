@@ -2,7 +2,7 @@
 -- character creation, level up, respec, party view and the in-menu highlighter (stars, rainbow outlines of tiles
 -- and spell icons, point-buy and ability-improvement targets, feat sub-choices, spell swaps, restore on close).
 local ROOT = ...
-local LUA = ROOT .. "/Mods/BuildAdvisor/ScriptExtender/Lua/"
+local LUA = ROOT .. "/BuildAdvisor/Mods/BuildAdvisor/ScriptExtender/Lua/"
 
 ------------------------------------------------------------------ mock static data
 local function ts(s) return { Get = function() return s end, Handle = { Handle = s } } end

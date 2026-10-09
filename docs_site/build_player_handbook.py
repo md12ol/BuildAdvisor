@@ -1,9 +1,9 @@
 """Builds the PLAYER handbook of one mod from the full docs site:
 
-    python docs_site/build_player_handbook.py                       # both mods -> <project>/<Mod>/Handbook.html
+    python docs_site/build_player_handbook.py                       # both mods -> <project>/dist/<Mod>/Handbook.html
     python docs_site/build_player_handbook.py --mod LootAdvisor --out some/dir/Handbook.html
 
-Source: docs_site/mods_docs.html (the full private version; never edited here). Each install folder gets its own
+Source: docs_site/mods_docs.html (the full private version; never edited here). Each player package gets its own
 handbook: a short shared chapter (Script Extender, mod manager, what is in the folder, using both mods) plus that mod's
 chapter. One handbook per mod rather than one for both, because a player downloads one mod: the file then only
 describes what they installed and stays half the size.
@@ -125,7 +125,7 @@ def fix_figures(html, misses, media_dir=None):
         seen.add(label.group(1))
         if rule.get("media"):
             mod, name = rule["media"]
-            path = os.path.join(media_dir or os.path.join(DESKTOP, mod, mod, "Media"), name)
+            path = os.path.join(media_dir or os.path.join(DESKTOP, mod, "package", "Media"), name)
             if not os.path.isfile(path):
                 misses.append("media file missing, figure dropped: %s" % path)
                 return ""
@@ -357,7 +357,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mod", choices=sorted(MODS), action="append")
     ap.add_argument("--out", help="output file (only with one --mod)")
-    ap.add_argument("--media", help="Media/ folder to take replacement screenshots from (default: the install folder's)")
+    ap.add_argument("--media", help="Media/ folder to take replacement screenshots from (default: <project>/package/Media)")
     a = ap.parse_args()
     mods = a.mod or sorted(MODS)
     if a.out and len(mods) != 1:
@@ -374,7 +374,7 @@ def main():
         if hits:
             bad += 1
             continue
-        out = a.out or os.path.join(DESKTOP, mod, mod, "Handbook.html")
+        out = a.out or os.path.join(DESKTOP, mod, "dist", mod, "Handbook.html")
         os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
         with open(out, "w", encoding="utf-8", newline="\n") as f:
             f.write(html)

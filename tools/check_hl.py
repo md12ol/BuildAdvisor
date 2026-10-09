@@ -28,7 +28,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import gamedata_ui  # noqa: E402
 
-BUILDS = os.path.join(ROOT, "Mods", "BuildAdvisor", "ScriptExtender", "Lua", "Shared", "Builds.lua")
+BUILDS = os.path.join(ROOT, "BuildAdvisor", "Mods", "BuildAdvisor", "ScriptExtender", "Lua", "Shared", "Builds.lua")
 AB = {"STR": "Strength", "DEX": "Dexterity", "CON": "Constitution", "INT": "Intelligence", "WIS": "Wisdom",
       "CHA": "Charisma"}
 PREPARERS = {"Cleric", "Druid", "Paladin"}

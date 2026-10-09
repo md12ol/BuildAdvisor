@@ -18,7 +18,7 @@ It works in two ways:
 
 ## Install
 1. Install Script Extender.
-2. Import `BuildAdvisor.pak` (in the [`BuildAdvisor/`](BuildAdvisor/) folder of this repository, see its `INSTALL.md`) with BG3 Mod Manager, or copy it to
+2. Download `BuildAdvisor-X.Y.Z.zip` from the [Releases](https://github.com/md12ol/BuildAdvisor/releases) page (or the mod's Nexus Mods page) and import its `BuildAdvisor.pak` (see [`INSTALL.md`](package/INSTALL.md)) with BG3 Mod Manager, or copy it to
    `%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\`. Then enable it in the mod manager and export the load order.
 3. Start the game. The window opens on its own in character creation and level-up. **F7** toggles it (F9 = photo mode and F10 = hide UI are game keys).
 
@@ -52,14 +52,36 @@ Console commands (Script Extender console): `!ba_toggle`, `!ba_dump` (prints wha
 | Circle of the Moon Druid 12 | A | Druid | Halsin |
 | Circle of the Stars Druid 12 | A | Druid | Jaheira |
 
-To edit or add builds, change `Mods/BuildAdvisor/ScriptExtender/Lua/Shared/Builds.lua`. Each level's `hl` list holds the exact English menu labels to star (`asi` the ability raises, `swap` a spell to replace). Check every label and level against the game's own data, then rebuild:
+To edit or add builds, change `BuildAdvisor/Mods/BuildAdvisor/ScriptExtender/Lua/Shared/Builds.lua`. Each level's `hl` list holds the exact English menu labels to star (`asi` the ability raises, `swap` a spell to replace). Check every label and level against the game's own data, then rebuild:
 
 ```bash
 python tools/check_hl.py        # 0 unknown labels, 0 plan errors
-python ../BG3Tools/tools/build_pak.py BuildAdvisor   # -> ../BG3Tools/dist/ AND BuildAdvisor/BuildAdvisor.pak
+python ../BG3Tools/tools/build_pak.py BuildAdvisor   # -> dist/BuildAdvisor.pak + the player package dist/BuildAdvisor/
+python ../BG3Tools/tools/ci_release.py check BuildAdvisor   # what CI runs: build, zip the package, check it against INSTALL.md
 ```
-The pak builder lives in the sibling repository [BG3Tools](https://github.com/md12ol/BG3Tools), checked out next to this one; every build copies the fresh pak into the `BuildAdvisor/` install folder, so the committed pak never goes stale. `Mods/BuildAdvisor` is the source. `BuildAdvisor/` holds what a player needs: the built pak, `INSTALL.md`, `Handbook.html` (the player handbook, generated from `docs_site/mods_docs.html` by `python docs_site/build_player_handbook.py`, with a leak check) and `Media/` (Gilded Panel banner, thumbnail, marks, screenshots; list in BG3Tools `tools/release_files.py`).
-The outline textures are built with `python ../LootAdvisor/tools/make_la_gui.py Mods/BuildAdvisor/GUI --set build` (sibling LootAdvisor repository; recoloured from the game's own frame textures, shipped under Larian's modding terms).
+The pak builder lives in the sibling repository [BG3Tools](https://github.com/md12ol/BG3Tools), checked out next to this one. Built paks are not committed; `dist/` is gitignored.
+
+## Repository layout
+| Path | What |
+|---|---|
+| `BuildAdvisor/` | the mod source as in other BG3 mod repositories: `BuildAdvisor/Mods/BuildAdvisor/` (meta.lsx, Lua, GUI); `Public/` and `Localization/` next to it when the mod needs them. This folder is what gets packed |
+| `package/` | the hand-made part of the player package: `INSTALL.md` and `Media/` (Gilded Panel banner, thumbnail, marks, screenshots; list in BG3Tools `tools/release_files.py`) |
+| `dist/` | local builds (gitignored): `BuildAdvisor.pak` and the player package `dist/BuildAdvisor/` (pak, `INSTALL.md`, `Handbook.html`, `Media/`), which a release zips as `BuildAdvisor-X.Y.Z.zip` |
+| `docs_site/` | the docs site; `python docs_site/build_player_handbook.py` makes the player `Handbook.html` from it (with a leak check) |
+| `tools/` | tests and the highlight-label checker |
+| `branding/` | the logo and banner generators |
+| `.luarc.json` | Lua language server settings (see Lua tooling below) |
+| `nexus_description.bb` | the Nexus Mods page text (BBCode) |
+| `LICENSE` | MIT |
+
+### Lua tooling
+`.luarc.json` configures [Lua Language Server](https://luals.github.io/) (the VS Code "Lua" extension) for Script Extender's Lua 5.4 and its globals. For completion of `Ext.*`, `Osi.*` and the entity types, fetch Script Extender's IDE helpers ([`ExtIdeHelpers.lua`](https://github.com/Norbyte/bg3se/blob/main/BG3Extender/IdeHelpers/ExtIdeHelpers.lua) from the bg3se repository) into `.ide/`, which `.luarc.json` already lists as a library:
+```bash
+curl -L --create-dirs -o .ide/ExtIdeHelpers.lua https://raw.githubusercontent.com/Norbyte/bg3se/main/BG3Extender/IdeHelpers/ExtIdeHelpers.lua
+```
+`.ide/` is gitignored: the helpers are Script Extender's own file under its own license, so they are not copied here.
+
+The outline textures are built with `python ../LootAdvisor/tools/make_la_gui.py BuildAdvisor/Mods/BuildAdvisor/GUI --set build` (sibling LootAdvisor repository; recoloured from the game's own frame textures, shipped under Larian's modding terms).
 
 ## Tests
 `python tools/run_tests.py` (needs `pip install lupa`) runs the mod against a mocked Script Extender. The mock covers character creation, level-up, respec, origin, party view, the highlighter (stars, outlines, point-buy and ability-improvement targets, feat choices, spell swaps, restoring) and the hotkey.
@@ -107,7 +129,7 @@ the repositories side by side and installs the pre-push hook).
 ## Known limits
 - Every game call is wrapped, so a game patch makes a feature fail quietly instead of crashing. If something doesn't show, run `!ba_dump` in the SE console.
 - Highlighting changes the text and colour of matching labels. If a menu looks wrong, untick *Highlight in game menus*. The window still works on its own.
-- If the game or mod manager rejects the generated pak, pack the `Mods` folder with LSLib/Divine or BG3 Modder's Multitool.
+- If the game or mod manager rejects the generated pak, pack the `BuildAdvisor` folder (its `Mods/`) with LSLib/Divine or BG3 Modder's Multitool.
 
 ## Sources
 - [Best BG3 classes 2026 tier list](https://everythingedinburgh.com/games/gaming/best-bg3-classes/)
