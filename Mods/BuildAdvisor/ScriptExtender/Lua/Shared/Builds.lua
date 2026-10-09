@@ -635,7 +635,7 @@ BA.Origins = {
   gale        = { builds = { "tempestevoker", "stormsorc" }, note = "Human (locked). Wizard 1-5, Tempest Cleric at 6-7, then Wizard to 10." },
   karlach     = { builds = { "giants", "throwzerker", "throw_zerk7_thief3" }, note = "Zariel Tiefling (locked). Barbarian is already her best class; the Berserker / Thief thrower is the third option." },
   laezel      = { builds = { "bmgiant", "sorcadin" }, note = "Githyanki (locked). Stays Fighter: Battle Master with an advantage source, or respec to Sorcadin." },
-  shadowheart = { builds = { "lightcleric", "lightquick" }, note = "High Half-Elf (locked). Pick Light Domain when choosing her domain. Same build on the Shar and Selune paths." },
+  shadowheart = { builds = { "lightquick", "lightcleric" }, note = "High Half-Elf (locked). Pick Light Domain when choosing her domain. Same build on the Shar and Selune paths." },
   wyll        = { builds = { "sorlock", "lockadin", "hexsorlock" }, note = "Human (locked). Patch 8 Hexblade makes Lockadin and the Hexblade Sorlock strong alternatives." },
   halsin      = { builds = { "moondruid", "tbmonk" }, note = "Wood Elf (locked). Moon Druid, or respec to Tavern Brawler Monk." },
   jaheira     = { builds = { "starsdruid", "gloomassassin" }, note = "High Half-Elf (locked)." },

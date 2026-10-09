@@ -194,7 +194,7 @@ entities.CCRespecDefinition = { { CCRespecDefinition = { Definition = {
   Definition = { Race = "helf", Subrace = "", Origin = "sh" },
   LevelUpData = { Class = "clr", SubClass = "", Upgrades = { AbilityBonuses = {} } } } } } }
 tick(); dump("Withers respec: Shadowheart")
-expect(BA.Current.build.id == "lightcleric", "Shadowheart -> Light Cleric (lightcleric first until lightquick is re-checked)")
+expect(BA.Current.build.id == "lightquick", "Shadowheart -> Light Cleric / Sorcerer (lightquick first)")
 entities.CCRespecDefinition = nil
 
 -- 5) Party view (Astarion, rogue 3)
@@ -379,7 +379,7 @@ local function firstBuilds(origin, cls)
   return out
 end
 local o = firstBuilds("Gale"); expect(o[1] == "tempestevoker" and o[2] == "stormsorc", "Gale: tempestevoker, stormsorc")
-o = firstBuilds("ShadowHeart"); expect(o[1] == "lightcleric" and o[2] == "lightquick", "Shadowheart: lightcleric, lightquick")
+o = firstBuilds("ShadowHeart"); expect(o[1] == "lightquick" and o[2] == "lightcleric", "Shadowheart: lightquick, lightcleric")
 o = firstBuilds("Laezel"); expect(o[1] == "bmgiant" and o[2] == "sorcadin", "Lae'zel: bmgiant, sorcadin")
 o = firstBuilds("Karlach"); expect(o[1] == "giants" and o[2] == "throwzerker" and o[3] == "throw_zerk7_thief3", "Karlach: giants, throwzerker, thrower third")
 o = firstBuilds("Wyll"); expect(o[1] == "sorlock" and o[2] == "lockadin" and o[3] == "hexsorlock", "Wyll: sorlock, lockadin, hexsorlock third")
