@@ -1,7 +1,7 @@
 """Renders the branding pages to PNG with headless Edge/Chrome (Chrome DevTools Protocol, stdlib + Pillow).
 
     python branding/src/render.py                 -> every option / mod / format, then the contact sheet
-    python branding/src/render.py 2 la banner     -> one option (1-3), mod (ba|la|ap|all), format (or all)
+    python branding/src/render.py 2 la banner     -> one option (1-3), mod (ba|la|all), format (or all)
 
 Pages: branding/src/option{1,2,3}.html?mod=..&fmt=..  Output: branding/<Mod>/option{n}_<fmt>.png
 Small formats (marks, wordmark) are drawn at 4x and downsampled, on a transparent background.
@@ -29,7 +29,7 @@ BROWSERS = [r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
             r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
             r"C:\Program Files\Google\Chrome\Application\chrome.exe"]
 PORT = 9341
-DIRS = {"ba": "BuildAdvisor", "la": "LootAdvisor", "ap": "Autopilot"}
+DIRS = {"ba": "BuildAdvisor", "la": "LootAdvisor"}
 # fmt: (css width, css height, scale, transparent, output size, output name)
 FMTS = {
     "banner": (1920, 1080, 1, False, None, "banner"),
@@ -73,7 +73,7 @@ def render(ws, opt, mod, fmt):
 def main():
     a = sys.argv[1:]
     opts = [int(a[0])] if a and a[0] != "all" else [1, 2, 3]
-    mods = [a[1]] if len(a) > 1 and a[1] != "all" else ["ba", "la", "ap"]
+    mods = [a[1]] if len(a) > 1 and a[1] != "all" else ["ba", "la"]
     fmts = [a[2]] if len(a) > 2 and a[2] != "all" else list(FMTS)
     exe = next((b for b in BROWSERS if os.path.exists(b)), None)
     if not exe:

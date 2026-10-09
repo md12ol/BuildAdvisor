@@ -15,8 +15,7 @@ OPTS = [
     ("Option 3 \u00b7 Cinematic", "A full-bleed game scene fading to black, a Cormorant film title, the mod's own UI floating over it; medallion monograms."),
 ]
 MODS = [("BuildAdvisor", "Build Advisor", "gold \u00b7 star + level-up chevron"),
-        ("LootAdvisor", "Loot Advisor", "prism \u00b7 rainbow gem / diamond"),
-        ("Autopilot", "Autopilot", "ember red \u00b7 hex + nav arrow \u00b7 private")]
+        ("LootAdvisor", "Loot Advisor", "prism \u00b7 rainbow gem / diamond")]
 CW, GAP, M = 900, 44, 60
 BG, INK, INK2, RULE = (13, 11, 9), (239, 228, 204), (160, 148, 128), (91, 74, 51)
 PANELS = [(30, 26, 22), (58, 44, 28)]   # game window panel colours the marks must read on
@@ -47,7 +46,7 @@ def main():
     sheet = Image.new("RGB", (W, H), BG)
     dr = ImageDraw.Draw(sheet)
     dr.text((M, 50), "BG3 mods \u2014 branding options", font=t_big, fill=INK)
-    dr.text((M, 130), "Build Advisor \u00b7 Loot Advisor \u00b7 Autopilot (private).  Each column is one option, used the same way by all three mods; "
+    dr.text((M, 130), "Build Advisor \u00b7 Loot Advisor.  Each column is one option, used the same way by both mods; "
             "each mod keeps its own identity colour.", font=font("segoeui.ttf", 24), fill=INK2)
     for i, (name, desc) in enumerate(OPTS):
         x = M + i * (CW + GAP)

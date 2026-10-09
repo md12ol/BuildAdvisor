@@ -9,13 +9,11 @@
 <style>
   .stage { position: absolute; inset: 0; overflow: hidden;
     background: radial-gradient(ellipse 70% 80% at 28% 45%, #261e16 0%, #15100c 55%, #0a0806 100%); }
-  .m-ap .stage { background: radial-gradient(ellipse 70% 80% at 28% 45%, #2a1915 0%, #160e0c 55%, #0a0706 100%); }
   .frame { position: absolute; inset: var(--fi, 26px); border: 1px solid #6e5634; pointer-events: none; z-index: 20; }
   .frame::before { content: ""; position: absolute; inset: 7px; border: 1px solid rgba(110, 86, 52, .45); }
   .frame i { position: absolute; width: var(--cd, 16px); height: var(--cd, 16px); transform: translate(-50%, -50%) rotate(45deg);
     background: linear-gradient(135deg, #fff0c8, #d2a253 50%, #7a5528); box-shadow: 0 0 0 3px #0f0b08; }
   .m-la .frame i.c { background: var(--prism); }
-  .m-ap .frame i.c { background: linear-gradient(135deg, #ffc2b6, #e0584a 50%, #7a1f19); }
   .eyebrow { font-family: "Alegreya Sans SC", sans-serif; font-weight: 700; letter-spacing: .22em; color: #a8957a; text-transform: lowercase; }
   .title { font-family: "Alegreya SC", serif; font-weight: 700; line-height: .92; letter-spacing: .01em;
     background: linear-gradient(180deg, #fff6df 0%, #efd7a2 55%, #b98c46 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -25,23 +23,19 @@
   .divider::after { background: linear-gradient(90deg, #8a6d42, transparent); }
   .divider b { width: 12px; height: 12px; transform: rotate(45deg); background: linear-gradient(135deg, #fff0c8, #d2a253 50%, #7a5528); }
   .m-la .divider b { background: var(--prism); }
-  .m-ap .divider b { background: linear-gradient(135deg, #ffc2b6, #e0584a 50%, #7a1f19); }
   .tag { font-style: italic; color: #dccfb4; }
   .feats { list-style: none; color: #c9bca3; }
   .feats li { display: flex; align-items: center; gap: .7em; margin-top: .45em; }
   .feats li::before { content: ""; width: .42em; height: .42em; transform: rotate(45deg); flex: none; background: #c99a4c; }
   .m-la .feats li::before { background: var(--prism); }
-  .m-ap .feats li::before { background: #e0584a; }
   .kbd { display: inline-flex; align-items: center; gap: .6em; font-family: "Alegreya Sans SC", sans-serif; letter-spacing: .12em; color: #a8957a; }
   .kbd b { font-family: "IBM Plex Mono", monospace; letter-spacing: 0; color: #f3e3bd; border: 1px solid #8a6d42; border-bottom-width: 3px; padding: .05em .5em; border-radius: 5px; background: #221a12; }
   /* plate = the in-game ability-icon style tile that holds the emblem */
   .plate { position: relative; width: var(--p); height: var(--p); border-radius: 16%; padding: calc(var(--p) * .035);
     background: linear-gradient(135deg, #fff0c8, #c99a4c 40%, #6e4a1f 70%, #e2bd76); box-shadow: 0 calc(var(--p) * .06) calc(var(--p) * .16) rgba(0,0,0,.6); flex: none; }
   .m-la .plate { background: linear-gradient(135deg, #fff0c8, #c99a4c 40%, #6e4a1f 70%, #e2bd76); }
-  .m-ap .plate { background: linear-gradient(135deg, #ffd0c6, #c24a3c 40%, #5a1712 70%, #e0786a); }
   .plate .in { position: relative; width: 100%; height: 100%; border-radius: 13%; background: radial-gradient(circle at 50% 38%, #3a2c1f, #140f0b 75%);
     display: grid; place-items: center; overflow: hidden; box-shadow: inset 0 0 0 calc(var(--p) * .014) rgba(0,0,0,.8), inset 0 0 calc(var(--p) * .2) rgba(0,0,0,.7); }
-  .m-ap .plate .in { background: radial-gradient(circle at 50% 38%, #3a201b, #140b09 75%); }
   .plate .in::after { content: ""; position: absolute; inset: 7%; border-radius: 10%; border: 1px solid rgba(226, 189, 118, .28); }
   .plate .halo { width: 150%; height: 150%; }
   .pic { position: absolute; border: 1px solid #8a6d42; box-shadow: 0 0 0 5px rgba(12, 9, 7, .9), 0 0 0 6px rgba(138, 109, 66, .5), 0 34px 70px rgba(0,0,0,.75); background: #000; overflow: hidden; }
@@ -57,7 +51,7 @@
 <div class="stage grain" id="stage"></div>
 <script src="common.js"></script>
 <script>
-const { MOD, FMT, M, emblem, baWindow, baMenu, apLog } = BR;
+const { MOD, FMT, M, emblem, baWindow, baMenu } = BR;
 document.body.classList.add("m-" + MOD);
 const S = document.getElementById("stage");
 
@@ -104,18 +98,12 @@ function visual(x, y, k, kind) {
            `<div class="abs" style="left:${x}px;top:${y + P(500)}px">${baMenu({ fs: 24 * k, w: 255 * k, label: "level up · class", items: [["Barbarian"], ["Fighter"], ["Ranger"], ["Rogue", 1], ["Wizard"]] })}</div>` +
            `<div class="cap" style="left:${x + P(265)}px;top:${y - P(16)}px">F7 · the advisor window</div>`;
   }
-  // ap
-  if (kind === "strip") return picPos("ap_blast2.jpg", x, y, P(640), P(330), "55% 40%") +
-      `<div class="glass" style="left:${x + P(20)}px;top:${y + P(215)}px;padding:${P(8)}px ${P(14)}px">${apLog({ fs: 12 * k, lines: BR.APLOG.slice(2, 5) })}</div>`;
-  return picPos("ap_blast2.jpg", x + P(60), y, P(820), P(462), "55% 45%") +
-         `<div class="glass" style="left:${x}px;top:${y + P(500)}px">${apLog({ fs: 15.5 * k, lines: BR.APLOG.slice(0, 7) })}</div>` +
-         `<div class="cap" style="left:${x + P(80)}px;top:${y - P(16)}px">helm run a164 · one fire bolt, both bosses</div>`;
 }
 
 const L = {
   banner() {
     S.innerHTML = frame(26, 18) +
-      textBlock({ x: 130, y: MOD === "ap" ? 210 : 200, w: 760, plate: 150, eb: 21, t: 128, tg: 40, feats: 27, key: 24 }) +
+      textBlock({ x: 130, y: 200, w: 760, plate: 150, eb: 21, t: 128, tg: 40, feats: 27, key: 24 }) +
       visual(MOD === "ba" ? 930 : 950, MOD === "la" ? 130 : 150, 1);
   },
   thumb() {
@@ -124,11 +112,9 @@ const L = {
     else if (MOD === "ba") v = `<div class="abs clip" data-from=".sept" data-idx="1" style="left:96px;top:96px;width:832px;height:480px;overflow:hidden;border:1px solid #8a6d42">
         <div style="margin-left:-1px">${baWindow({ fs: 21, w: 836, compact: true, planFrom: 7 })}</div></div>` +
         `<div class="abs" style="left:640px;top:300px">${baMenu({ fs: 26, w: 260, label: "level up · class", items: [["Fighter"], ["Ranger"], ["Rogue", 1], ["Wizard"]] })}</div>`;
-    else v = picPos("ap_blast2.jpg", 96, 96, 832, 470, "55% 45%") +
-        `<div class="glass" style="left:96px;top:420px;padding:10px 18px">${apLog({ fs: 17, lines: BR.APLOG.slice(2, 6) })}</div>`;
     S.innerHTML = frame(22, 16) + v +
-      `<div class="abs" style="left:0;right:0;top:${MOD === "ap" ? 630 : 640}px;display:flex;flex-direction:column;align-items:center;text-align:center">
-        <div style="display:flex;align-items:center;gap:26px">${plate(118)}<div class="title" style="font-size:${MOD === "ap" ? 104 : 96}px">${M.name}</div></div>
+      `<div class="abs" style="left:0;right:0;top:640px;display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div style="display:flex;align-items:center;gap:26px">${plate(118)}<div class="title" style="font-size:96px">${M.name}</div></div>
         <div class="divider" style="width:560px;margin:24px 0 18px"><b></b></div>
         <div class="tag" style="font-size:34px;max-width:820px">${M.tag}</div>
         ${M.private ? `<div style="margin-top:22px">${stampOrKey(22)}</div>` : ""}

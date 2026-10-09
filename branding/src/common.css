@@ -1,4 +1,4 @@
-/* Shared by option1/2/3.html: palette, fonts, emblems and the in-game mock-ups (Build Advisor window, Autopilot log). */
+/* Shared by option1/2/3.html: palette, fonts, emblems and the in-game mock-ups (Build Advisor window). */
 @import url("https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Alegreya+SC:wght@500;700;800&family=Alegreya+Sans+SC:wght@500;700&family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=IBM+Plex+Mono:wght@400;500;600&display=block");
 
 :root {
@@ -19,7 +19,6 @@
 /* identity colour per mod */
 .m-ba { --id: #e2b45a; --id-hi: #ffe6a6; --id-lo: #8a5f1c; --id-glow: rgba(255, 196, 92, .55); --id-ring: linear-gradient(135deg, #fff0c4, #e2b45a 40%, #8a5f1c 75%, #e9c477); }
 .m-la { --id: #f0d9a6; --id-hi: #fff4d6; --id-lo: #7a5a2a; --id-glow: rgba(255, 255, 255, .35); --id-ring: var(--prism); }
-.m-ap { --id: #e0584a; --id-hi: #ffb3a6; --id-lo: #7a1f19; --id-glow: rgba(240, 80, 60, .55); --id-ring: linear-gradient(135deg, #ffb3a6, #e0584a 45%, #7a1f19 80%, #e0584a); }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; overflow: hidden; }
@@ -93,14 +92,6 @@ img { display: block; }
 .menu .it.on { color: #fff; background: linear-gradient(90deg, rgba(226,180,90,.22), rgba(226,180,90,0)); box-shadow: inset 3px 0 0 #e2b45a; }
 .menu .star { color: #ffd98a; font-size: .8em; text-shadow: 0 0 8px rgba(255, 210, 120, .8); }
 .menu .lab { font-family: "Alegreya Sans SC", sans-serif; font-size: .6em; letter-spacing: .14em; color: #8f8577; padding: .2em .9em .35em; }
-
-/* ---------------- Autopilot engine log (real lines from tools/bg3drive/helmbot.log, attempt a165/a166) ---------------- */
-.log { font-family: "IBM Plex Mono", Consolas, monospace; font-size: var(--fs, 17px); line-height: 1.55; color: #c9c2b6; white-space: pre; }
-.log .t { color: #7d766c; }
-.log .k { color: #ff9a8a; }
-.log .ok { color: #8fe39a; }
-.log .d { color: #ffcf7a; }
-.log .c { color: #8fc7ff; }
 
 /* ---------------- private stamp ---------------- */
 .stamp { font-family: "IBM Plex Mono", monospace; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: #ff8f80;
