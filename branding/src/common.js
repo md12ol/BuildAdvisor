@@ -1,4 +1,4 @@
-/* Shared data and builders for option1/2/3.html.  URL: optionN.html?mod=ba|la|ap&fmt=banner|thumb|docs|mark|marksm|wordmark|sets */
+/* Shared data and builders for option1/2/3.html.  URL: optionN.html?mod=ba|la&fmt=banner|thumb|docs|mark|marksm|wordmark|sets */
 (function () {
   const q = new URLSearchParams(location.search);
   const MOD = q.get("mod") || "la";
@@ -21,14 +21,6 @@
       feats: ["Rainbow frames on the items that suit your build", "Rainbow map markers that lead you to them", "An F6 item list and a live Sets page"],
       ring: ["Frames", "Markers", "Item list", "Sets page"],
     },
-    ap: {
-      name: "Autopilot", mono: "AP", hotkey: "—", private: true,
-      eyebrow: "Baldur's Gate 3 · Script Extender · private tool",
-      tag: "Reads the engine. Plays by the rules.",
-      short: "Engine readouts and fair actions for automated play-testing.",
-      feats: ["Room scanner and a millisecond event log", "Engine actions charged like a player's", "Route checks that avoid attacks of opportunity"],
-      ring: ["Scan", "Command", "Events", "Fair play"],
-    },
   };
 
   let uid = 0;
@@ -48,20 +40,7 @@
         <path d="M27 96 L50 80 L73 96" fill="none" stroke="url(#${id})" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>
       </svg></div>`;
     }
-    // ap: hexagonal engine housing + navigation arrow
-    const sw = small ? 8 : 5;
-    const ticks = small ? "" : [0, 1, 2, 3, 4, 5].map(i => {
-      const a = (i * 60 + 30) * Math.PI / 180, r1 = 36, r2 = 30.5;
-      return `<line x1="${50 + r1 * Math.cos(a)}" y1="${50 + r1 * Math.sin(a)}" x2="${50 + r2 * Math.cos(a)}" y2="${50 + r2 * Math.sin(a)}" stroke="#e0584a" stroke-width="2.4" stroke-linecap="round"/>`;
-    }).join("");
-    return `<div class="${cls}" style="--s:${size}px"><svg viewBox="0 0 100 100">
-      <defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc2b6"/><stop offset=".45" stop-color="#e0584a"/><stop offset="1" stop-color="#7a1f19"/></linearGradient></defs>
-      <polygon points="50,4 90,27 90,73 50,96 10,73 10,27" fill="rgba(20,8,6,.55)" stroke="rgba(10,4,3,.9)" stroke-width="${sw + 3}" stroke-linejoin="round"/>
-      <polygon points="50,4 90,27 90,73 50,96 10,73 10,27" fill="none" stroke="url(#${id})" stroke-width="${sw}" stroke-linejoin="round"/>
-      ${ticks}
-      <path d="M50 24 L71 74 L50 62 L29 74Z" fill="url(#${id})" stroke="rgba(10,4,3,.9)" stroke-width="2" stroke-linejoin="round"/>
-      <path d="M50 24 L50 62 L29 74Z" fill="rgba(255,255,255,.18)"/>
-    </svg></div>`;
+    return "";
   }
 
   /* ---- Build Advisor window: Astarion levelling to 9 on the "thx" build (Shared/Builds.lua, Client/Window.lua) ---- */
@@ -116,25 +95,6 @@
       `<div class="it${i[1] ? " on" : ""}">${i[1] ? '<span class="star">★</span>' : ""}${i[0]}</div>`).join("")}</div>`;
   }
 
-  /* ---- Autopilot: real lines from tools/bg3drive/helmbot.log ---- */
-  const APLOG = [
-    ["302.6", "  Shadowheart 15.9 m from the tanks - moving into Fire Bolt range", ""],
-    ["303.1", "  > as Shadowheart: fsafe -57.33 -394.34 => <ok>fsafe ok</ok>", ""],
-    ["305.7", "<k>BLAST</k>: Shadowheart Fire Bolt (zhalk 14, flayer 15)", ""],
-    ["306.6", "  > as Shadowheart: <c>fcast</c> Projectile_FireBolt Nautiloid Tank => <ok>fcast ok</ok>", ""],
-    ["320.3", "<d>DIED</d> Commander Zhalk", ""],
-    ["320.3", "<d>DIED</d> Mind Flayer", ""],
-    ["419.1", "  MOVE Tav <c>fwalk</c> 7.4 m to -70.25 17.00 -389.75 (Movement 9.0 -> 2.6)", ""],
-    ["465.5", "FINAL enemies left: []   FINAL loot left: [] (unreachable 0)", ""],
-  ];
-  function apLog(o) {
-    o = o || {};
-    const lines = (o.lines || APLOG).map(l => `<span class="t">${l[0].padStart(6)}</span>  ` + l[1]
-      .replace(/<k>(.*?)<\/k>/g, '<span class="k">$1</span>').replace(/<ok>(.*?)<\/ok>/g, '<span class="ok">$1</span>')
-      .replace(/<d>(.*?)<\/d>/g, '<span class="d">$1</span>').replace(/<c>(.*?)<\/c>/g, '<span class="c">$1</span>'));
-    return `<div class="log" style="--fs:${o.fs || 17}px">${lines.join("\n")}</div>`;
-  }
-
   const FONTS = ['400 20px "Alegreya"', 'italic 400 20px "Alegreya"', '700 20px "Alegreya SC"', '500 20px "Alegreya SC"',
     '700 20px "Alegreya Sans SC"', '600 20px "Cinzel"', '700 20px "Cinzel"', '600 20px "Cormorant Garamond"', '700 20px "Cormorant Garamond"',
     'italic 500 20px "Cormorant Garamond"', '400 20px "IBM Plex Mono"', '600 20px "IBM Plex Mono"'];
@@ -159,5 +119,5 @@
     window.__ready = true;
   }
 
-  window.BR = { MOD, FMT, M: MODS[MOD], MODS, emblem, baWindow, baMenu, apLog, ready, APLOG, THX };
+  window.BR = { MOD, FMT, M: MODS[MOD], MODS, emblem, baWindow, baMenu, ready, THX };
 })();

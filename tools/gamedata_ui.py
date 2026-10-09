@@ -21,7 +21,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LA_TOOLS = os.path.join(os.path.dirname(ROOT), "LootAdvisor", "tools")   # Desktop/BG3Mods/LootAdvisor (restructure 2026-10)
+LA_TOOLS = os.path.join(os.path.dirname(ROOT), "LootAdvisor", "tools")   # ../LootAdvisor next to this repo
 CACHE = os.path.join(os.path.dirname(ROOT), "LootAdvisor", "data", "cache")
 sys.path.insert(0, LA_TOOLS)
 from pak import Pak, GAME_DATA  # noqa: E402

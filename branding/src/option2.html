@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="common.css">
 <style>
   .stage { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(ellipse 80% 90% at 70% 50%, #17120e 0%, #0a0807 55%, #050404 100%); }
-  .m-ap .stage { background: radial-gradient(ellipse 80% 90% at 70% 50%, #1c100d 0%, #0b0706 55%, #050404 100%); }
   .bgimg { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(22px) brightness(.32) saturate(.85); opacity: .9;
     -webkit-mask-image: radial-gradient(ellipse 60% 75% at 72% 50%, #000 30%, transparent 75%); }
   .eyebrow { font-family: "Alegreya Sans SC", sans-serif; font-weight: 700; letter-spacing: .3em; color: #9d8e78; text-transform: lowercase; }
@@ -38,10 +37,10 @@
 <div class="stage grain" id="stage"></div>
 <script src="common.js"></script>
 <script>
-const { MOD, FMT, M, emblem, apLog } = BR;
+const { MOD, FMT, M, emblem } = BR;
 document.body.classList.add("m-" + MOD);
 const S = document.getElementById("stage");
-const BG = { la: "la_scene.jpg", ba: "ba_scene.jpg", ap: "ap_blast2.jpg" }[MOD];
+const BG = { la: "la_scene.jpg", ba: "ba_scene.jpg" }[MOD];
 
 function sigil(size, small) {
   return `<div class="sigil" style="width:${size}px;height:${size}px"><div class="halo" style="--s:${size}px"></div>${emblem(MOD, size, small)}</div>`;
@@ -51,7 +50,7 @@ function sigil(size, small) {
 function dial(cx, cy, R, band, opts) {
   opts = opts || {};
   const ro = R + band, size = (ro + 30) * 2, c = size / 2;
-  const col = { ba: "#e2b45a", la: "#e9d7ae", ap: "#e0584a" }[MOD];
+  const col = { ba: "#e2b45a", la: "#e9d7ae" }[MOD];
   let ticks = "";
   for (let i = 0; i < 120; i++) {
     const a = i * 3 * Math.PI / 180, major = i % 10 === 0, mid = i % 5 === 0;
@@ -82,20 +81,6 @@ function dial(cx, cy, R, band, opts) {
 /* lens contents per mod */
 function lensInner(D) {
   if (MOD === "la") return `<img src="assets/la_minimap.png" style="transform:scale(1.02)">`;
-  if (MOD === "ap") {
-    const k = D / 760;
-    return `<img src="assets/ap_lens.jpg">
-      <svg class="abs" style="inset:0" viewBox="0 0 760 760" width="${D}" height="${D}">
-        <g stroke="#ff8f80" stroke-opacity=".75" fill="none">
-          <circle cx="380" cy="380" r="120" stroke-dasharray="6 8"/><circle cx="380" cy="380" r="230" stroke-dasharray="2 10" stroke-opacity=".5"/>
-          <line x1="380" y1="40" x2="380" y2="250"/><line x1="380" y1="510" x2="380" y2="720"/><line x1="40" y1="380" x2="250" y2="380"/><line x1="510" y1="380" x2="720" y2="380"/>
-          <path d="M300 300 h-26 v26 M460 300 h26 v26 M300 460 h-26 v-26 M460 460 h26 v-26" stroke-width="3" stroke-opacity=".95"/>
-        </g>
-        <g font-family="IBM Plex Mono" font-size="17" font-weight="600" fill="#ffd2c9" stroke="#000" stroke-width="4" stroke-opacity=".8" paint-order="stroke">
-          <text x="470" y="560">BLAST  R10</text><text x="470" y="582" fill="#8fe39a">fcast ok</text>
-          <text x="150" y="490" fill="#c9c2b6">zhalk 15 · flayer 19</text><text x="150" y="512" fill="#ffcf7a">both DIED 340.4</text>
-        </g></svg>`;
-  }
   // ba: the level 1-12 plan as a rising constellation over Astarion's scene
   const pts = [[120, 560], [170, 525], [215, 548], [262, 500], [305, 462], [355, 478], [398, 430], [440, 392], [490, 340], [525, 290], [560, 248], [590, 195]];
   const lab = { 1: "Ranger", 3: "Gloom Stalker", 6: "Fighter", 8: "Battle Master", 9: "Rogue · Expertise", 11: "Thief", 12: "" };
@@ -130,7 +115,7 @@ const L = {
       `<div class="abs" style="left:130px;top:0;bottom:0;width:740px;display:flex;flex-direction:column;justify-content:center">
         ${sigil(130)}
         <div class="eyebrow" style="font-size:19px;margin:46px 0 22px">${M.eyebrow}</div>
-        <div class="title" style="font-size:${MOD === "ap" ? 104 : 112}px">${M.name.replace(" ", "<br>")}</div>
+        <div class="title" style="font-size:112px">${M.name.replace(" ", "<br>")}</div>
         <div class="rule" style="width:420px;margin:34px 0 28px"></div>
         <div class="tag" style="font-size:44px;line-height:1.15">${M.tag}</div>
         <ul class="feats" style="font-size:25px;margin-top:26px">${M.feats.map(f => `<li>${f}</li>`).join("")}</ul>
@@ -141,7 +126,7 @@ const L = {
     S.innerHTML = `<div class="bgimg" style="background-image:url(assets/${BG})"></div>` +
       lens(512, 400, 540, 44) +
       `<div class="abs" style="left:0;right:0;top:${M.private ? 738 : 760}px;display:flex;flex-direction:column;align-items:center;text-align:center">
-        <div style="display:flex;align-items:center;gap:26px">${sigil(84)}<div class="title" style="font-size:${MOD === "ap" ? 84 : 70}px;white-space:nowrap">${M.name}</div></div>
+        <div style="display:flex;align-items:center;gap:26px">${sigil(84)}<div class="title" style="font-size:70px;white-space:nowrap">${M.name}</div></div>
         <div class="rule" style="width:360px;margin:22px 0 18px;background:linear-gradient(90deg,transparent,var(--id),transparent)"></div>
         <div class="tag" style="font-size:36px">${M.tag}</div>
         ${M.private ? `<div style="margin-top:16px"><span class="stamp dashed" style="--fs:17px">Private tool · not released</span></div>` : ""}

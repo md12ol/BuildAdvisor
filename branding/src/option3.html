@@ -21,7 +21,6 @@
   .tag { font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500; color: #e2d6be; text-shadow: 0 2px 12px rgba(0,0,0,.9); }
   .hair { height: 3px; width: 140px; background: var(--id); }
   .m-la .hair { background: var(--prism-lin); }
-  .m-ap .hair { background: repeating-linear-gradient(90deg, #e0584a 0 14px, transparent 14px 22px); }
   .abs { position: absolute; }
   .float { position: absolute; box-shadow: 0 40px 90px rgba(0,0,0,.8); }
   .glass { background: rgba(14, 10, 9, .82); border: 1px solid rgba(224, 88, 74, .5); padding: 18px 24px; backdrop-filter: blur(6px); }
@@ -33,15 +32,11 @@
   .cap b { color: #f4ead6; font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 1.45em; display: block; margin-top: .15em; }
   /* medallion mark */
   .med { position: relative; width: var(--d); height: var(--d); border-radius: 50%; padding: calc(var(--d) * var(--rw, .075)); background: var(--id-ring); flex: none; }
-  .m-ap .med { background: repeating-conic-gradient(from 4deg, #ee6a5a 0 12deg, transparent 12deg 18deg); }
   .med .in { width: 100%; height: 100%; border-radius: 50%; display: grid; place-items: center; position: relative;
     background: radial-gradient(circle at 50% 35%, #2c231a, #0e0b08 72%); box-shadow: inset 0 0 0 calc(var(--d) * .015) rgba(0,0,0,.9), inset 0 calc(var(--d) * .04) calc(var(--d) * .1) rgba(0,0,0,.6); }
-  .m-ap .med .in { background: radial-gradient(circle at 50% 35%, #331915, #0e0706 72%); }
-  .m-ap .med .in i { background: #e0584a; }
   .med .in span { font-family: "Cormorant Garamond", serif; font-weight: 700; color: #f6ecd8; font-size: calc(var(--d) * var(--mf, .42)); letter-spacing: -.02em; line-height: 1;
     transform: translateY(-4%); text-shadow: 0 calc(var(--d) * .015) 0 rgba(0,0,0,.8); }
   .m-ba .med .in span { color: #ffe6a6; }
-  .m-ap .med .in span { color: #ffc2b6; }
   .med .in i { position: absolute; left: 50%; bottom: 13%; transform: translateX(-50%); width: calc(var(--d) * .2); height: calc(var(--d) * .025); border-radius: 2px; background: var(--id-ring); }
 </style>
 </head>
@@ -49,10 +44,10 @@
 <div class="stage grain" id="stage"></div>
 <script src="common.js"></script>
 <script>
-const { MOD, FMT, M, baWindow, baMenu, apLog } = BR;
+const { MOD, FMT, M, baWindow, baMenu } = BR;
 document.body.classList.add("m-" + MOD);
 const S = document.getElementById("stage");
-const SCENE = { la: ["la_wide.jpg", "70% 30%"], ba: ["ba_scene.jpg", "100% 50%"], ap: ["ap_blast1.jpg", "80% 40%"] }[MOD];
+const SCENE = { la: ["la_wide.jpg", "70% 30%"], ba: ["ba_scene.jpg", "100% 50%"] }[MOD];
 
 function med(d, small) {
   return `<div class="med" style="--d:${d}px;${small ? "--rw:.11;--mf:.5" : ""}"><div class="in"><span>${M.mono}</span>${small ? "" : "<i></i>"}</div></div>`;
@@ -75,25 +70,23 @@ function overlay(x, y, k) {
   if (MOD === "la") return `<div class="mag" style="left:${x}px;top:${y}px;width:${P(340)}px;height:${P(340)}px"><img src="assets/la_cell.png"></div>
     <div class="abs cap" style="left:${x}px;top:${y + P(370)}px;font-size:${P(17)}px;width:${P(520)}px">rainbow frame · in your inventory<b>Bhaalist Gloves — best Gloves for Astarion, Act 3</b></div>`;
   if (MOD === "ba") return `<div class="float clip" data-from=".sept" style="left:${x}px;top:${y}px;width:${P(620)}px;height:${P(430)}px;overflow:hidden"><div>${baWindow({ fs: 16 * k, w: 620 * k, compact: true, planFrom: 8 })}</div></div>`;
-  return `<div class="float glass" style="left:${x}px;top:${y}px;font-size:${P(16)}px"><div class="hd">engine log · helm run</div>${apLog({ fs: 15.5 * k, lines: BR.APLOG.slice(1, 6) })}</div>`;
 }
 
 const L = {
   banner() {
     S.innerHTML = scene(MOD === "ba" ? 520 : 560) +
       overlay(130, MOD === "ba" ? 76 : 100, MOD === "ba" ? 1.16 : 1) +
-      titleBlock({ x: 130, bottom: MOD === "ap" ? 96 : 110, w: 1100, eb: 19, t: 150, tg: 44 });
+      titleBlock({ x: 130, bottom: 110, w: 1100, eb: 19, t: 150, tg: 44 });
   },
   thumb() {
-    S.innerHTML = `<div class="scene" style="left:0"><img src="assets/${SCENE[0]}" style="object-position:${{ la: "62% 30%", ba: "72% 40%", ap: "75% 40%" }[MOD]}"></div>` +
+    S.innerHTML = `<div class="scene" style="left:0"><img src="assets/${SCENE[0]}" style="object-position:${{ la: "62% 30%", ba: "72% 40%" }[MOD]}"></div>` +
       (MOD === "la" ? `<div class="mag" style="left:70px;top:80px;width:260px;height:260px"><img src="assets/la_cell.png"></div>` :
-       MOD === "ba" ? `<div class="float clip" data-from=".sept" style="left:60px;top:60px;width:580px;height:410px;overflow:hidden"><div>${baWindow({ fs: 16, w: 580, compact: true, planFrom: 8 })}</div></div>` :
-       `<div class="float glass" style="left:60px;top:70px;font-size:15px"><div class="hd">engine log · helm run</div>${apLog({ fs: 15, lines: BR.APLOG.slice(2, 6) })}</div>`) +
-      titleBlock({ x: 70, bottom: 70, w: 900, eb: 16, t: MOD === "ap" ? 132 : 116, tg: 38 });
+       `<div class="float clip" data-from=".sept" style="left:60px;top:60px;width:580px;height:410px;overflow:hidden"><div>${baWindow({ fs: 16, w: 580, compact: true, planFrom: 8 })}</div></div>`) +
+      titleBlock({ x: 70, bottom: 70, w: 900, eb: 16, t: 116, tg: 38 });
     S.querySelector(".scene").classList.add("thumbscene");
   },
   docs() {
-    S.innerHTML = scene(560, { la: "60% 22%", ba: "100% 45%", ap: "80% 45%" }[MOD]) +
+    S.innerHTML = scene(560, { la: "60% 22%", ba: "100% 45%" }[MOD]) +
       `<div class="abs" style="left:80px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center">
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">${med(52)}<div class="eyebrow" style="font-size:15px">${M.eyebrow}</div></div>
         <div class="title" style="font-size:104px;white-space:nowrap">${M.name}</div>
@@ -101,7 +94,6 @@ const L = {
         <div class="tag" style="font-size:32px">${M.tag}</div>
         ${M.private ? `<div style="margin-top:14px"><span class="stamp dashed" style="--fs:14px">Private tool · not released</span></div>` : ""}</div>` +
       (MOD === "la" ? `<div class="mag" style="left:1290px;top:70px;width:250px;height:250px"><img src="assets/la_cell.png"></div>` :
-       MOD === "ap" ? "" :
        `<div class="float clip" data-from=".sept" data-idx="1" style="left:1070px;top:40px;width:480px;height:320px;overflow:hidden"><div>${baWindow({ fs: 15, w: 480, compact: true, planFrom: 8 })}</div></div>`);
   },
   sets() {
