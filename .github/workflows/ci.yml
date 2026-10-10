@@ -13,13 +13,12 @@ concurrency:
 permissions:
   contents: read
 env:
-  # the mod and its player package, in one place (repo layout may move: change only these; the mod source path
-  # lives in BG3Tools tools/build_pak.py)
+  # the mod in one place (its source is $MOD/{Mods,Public,Localization}; BG3Tools tools/build_pak.py finds it)
   MOD: BuildAdvisor
-  PACKAGE_DIR: BuildAdvisor
-  LUA_DIRS: Mods tools
+  LUA_DIRS: BuildAdvisor tools
   RUFF_VERSION: "0.16.9"
   LUPA_VERSION: "2.8"
+  PILLOW_VERSION: "11.3.0"
 
 jobs:
   lint:
@@ -83,12 +82,12 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
-      - run: pip install -q "lupa==$LUPA_VERSION"
+      - run: pip install -q "lupa==$LUPA_VERSION" "pillow==$PILLOW_VERSION"
       - name: Mock tests (mod against a mocked Script Extender)
         run: python BuildAdvisor/tools/run_tests.py
       - name: Mutations (the UI-thread gate removed must turn the tests red)
         run: python BuildAdvisor/tools/run_tests.py --mutate
       - name: Leak scan of shipped files (Loot Advisor's scanner covers both mods)
         run: python LootAdvisor/tools/leak_scan.py
-      - name: Pak build (no install, no game) + package folder complete per INSTALL.md
-        run: python BG3Tools/tools/ci_release.py check "$MOD" "BuildAdvisor/$PACKAGE_DIR"
+      - name: Pak build + player package zip (into dist/, no install, no game), zip checked against INSTALL.md
+        run: python BG3Tools/tools/ci_release.py check "$MOD"

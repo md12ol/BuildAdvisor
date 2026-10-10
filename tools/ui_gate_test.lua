@@ -4,7 +4,7 @@
 -- deferred callback. Run by tools/run_tests.py, once per scenario:
 --   ROOT, DEFER (bool), UNSAFE (bool), PATCHES ({ [file name] = { {old, new}, ... } }) -> result table
 local ROOT, DEFER, UNSAFE, PATCHES = ...
-local LUA = ROOT .. "/Mods/BuildAdvisor/ScriptExtender/Lua/"
+local LUA = ROOT .. "/BuildAdvisor/Mods/BuildAdvisor/ScriptExtender/Lua/"
 
 local R = { touches = 0, outside = 0, labels = 0, prints = {}, renders = 0 }
 local inDefer = false

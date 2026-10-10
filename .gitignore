@@ -1,9 +1,13 @@
-# BuildAdvisor - PUBLIC repo. Our code, mod source, tests, own art, doc screenshots and the
-# built pak in the install folder BuildAdvisor/. No extracted game files.
+# BuildAdvisor - PUBLIC repo. Our code, the mod source (BuildAdvisor/Mods, Public, Localization), tests, own art, doc
+# screenshots and the package sources (package/: INSTALL.md, Media/). No extracted game files, no built paks.
 
-# built paks anywhere except the install folder (refreshed by ../BG3Tools/tools/build_pak.py)
+# local builds (../BG3Tools/tools/build_pak.py): dist/BuildAdvisor.pak, the player package dist/BuildAdvisor/, its zip
+dist/
+# built paks, wherever they turn up
 *.pak
-!/BuildAdvisor/BuildAdvisor.pak
+
+# Script Extender IDE helpers (README "Lua tooling"), fetched locally
+.ide/
 
 # python / node / editor clutter
 __pycache__/

@@ -1,9 +1,9 @@
 """Builds the PLAYER handbook of one mod from the full docs site:
 
-    python docs_site/build_player_handbook.py                       # both mods -> <project>/<Mod>/Handbook.html
+    python docs_site/build_player_handbook.py                       # both mods -> <project>/dist/<Mod>/Handbook.html
     python docs_site/build_player_handbook.py --mod LootAdvisor --out some/dir/Handbook.html
 
-Source: docs_site/mods_docs.html (the full private version; never edited here). Each install folder gets its own
+Source: docs_site/mods_docs.html (the full private version; never edited here). Each player package gets its own
 handbook: a short shared chapter (Script Extender, mod manager, what is in the folder, using both mods) plus that mod's
 chapter. One handbook per mod rather than one for both, because a player downloads one mod: the file then only
 describes what they installed and stays half the size.
@@ -29,6 +29,15 @@ DESKTOP = os.path.dirname(BA)                   # the folder with the side-by-si
 SRC = os.path.join(HERE, "mods_docs.html")
 LEAK_SCAN = os.path.join(DESKTOP, "LootAdvisor", "tools")
 
+# shown at the top of the Loot Advisor handbook (the same sentence as its README, INSTALL.md, Nexus page, Sets page and
+# the one-time notice in its F6 window; Loot Advisor's tests check every copy)
+SPOILER_LA = ("Loot Advisor names items, where they are and who carries them, and its notes reveal story outcomes "
+              "(who can die, which side you take, endings).")
+SPOILER_NOTE = """
+      <div class="note warn">
+        <p><b>Spoiler warning:</b> %s</p>
+      </div>"""
+
 MODS = {
     "BuildAdvisor": {"name": "Build Advisor", "chapter": "buildadvisor", "key": "F7", "other": "Loot Advisor",
                      "other_repo": "https://github.com/md12ol/LootAdvisor", "repo": "https://github.com/md12ol/BuildAdvisor",
@@ -41,7 +50,8 @@ MODS = {
                     "tagline": "The right gear for your build, and where to find it: rainbow frames, rainbow map "
                                "markers, an item list and a live Sets page in your browser.",
                     "facts": [("Hotkey", "<kbd>F6</kbd> item list"), ("For", "the 7 origin characters"),
-                              ("Needs", "Script Extender v33 or newer for frames and map painting")]},
+                              ("Needs", "Script Extender v33 or newer for frames and map painting")],
+                    "spoiler": SPOILER_LA},
 }
 
 SE_URL = "https://github.com/Norbyte/bg3se"
@@ -81,7 +91,6 @@ RULES = [
 FIGURES = {
     "Enlarge: item frames": {"cover": [(0, 0, 1000, 62), (0, 283, 1000, 311)]},      # internal labels in the image
     "Enlarge: map markers compared": {"cover": [(0, 0, 1100, 33)]},                   # old internal mod name
-    "Enlarge: not covered message": {"drop": True},                                   # old mod name, a hireling name
     "Enlarge: legend": {"drop": True, "keep_caption": True},                          # old shot shows a save's name
     "Enlarge: Sets page": {"drop": True},                                             # save's name; page redesigned
 }
@@ -125,7 +134,7 @@ def fix_figures(html, misses, media_dir=None):
         seen.add(label.group(1))
         if rule.get("media"):
             mod, name = rule["media"]
-            path = os.path.join(media_dir or os.path.join(DESKTOP, mod, mod, "Media"), name)
+            path = os.path.join(media_dir or os.path.join(DESKTOP, mod, "package", "Media"), name)
             if not os.path.isfile(path):
                 misses.append("media file missing, figure dropped: %s" % path)
                 return ""
@@ -297,7 +306,7 @@ def build(mod, src, media_dir=None):
           <h2><span class="glyph %(glyph)s" aria-hidden="true"></span>%(name)s</h2>
           <dl>%(facts)s</dl>
         </a>
-      </div>
+      </div>%(spoiler)s
       <div class="note">
         <p><b>New here?</b> Read <a href="#before">Before you start</a> to install Script Extender and the mod, then <a href="#%(cid)s">%(name)s</a> for what you see in the game. The mod is free; source and updates: <a href="%(repo)s">%(repo)s</a>.</p>
       </div>
@@ -316,7 +325,8 @@ def build(mod, src, media_dir=None):
 </html>
 """ % {"name": d["name"], "style": style, "snav": snav, "nav": nav, "mnav": mnav, "cid": d["chapter"],
        "glyph": glyph, "tagline": d["tagline"], "facts": facts, "repo": d["repo"], "shared": shared, "sec": sec,
-       "script": script}
+       "script": script,
+       "spoiler": (SPOILER_NOTE % d["spoiler"] if d.get("spoiler") else "")}
     for k in FIGURES:
         if mod == "LootAdvisor" and k not in seen:
             misses.append("figure rule not used: %s" % k)
@@ -357,7 +367,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mod", choices=sorted(MODS), action="append")
     ap.add_argument("--out", help="output file (only with one --mod)")
-    ap.add_argument("--media", help="Media/ folder to take replacement screenshots from (default: the install folder's)")
+    ap.add_argument("--media", help="Media/ folder to take replacement screenshots from (default: <project>/package/Media)")
     a = ap.parse_args()
     mods = a.mod or sorted(MODS)
     if a.out and len(mods) != 1:
@@ -374,7 +384,7 @@ def main():
         if hits:
             bad += 1
             continue
-        out = a.out or os.path.join(DESKTOP, mod, mod, "Handbook.html")
+        out = a.out or os.path.join(DESKTOP, mod, "dist", mod, "Handbook.html")
         os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
         with open(out, "w", encoding="utf-8", newline="\n") as f:
             f.write(html)
