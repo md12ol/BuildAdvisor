@@ -19,7 +19,9 @@ BA = BA or {}
 BA.HL = { active = false }
 -- ContentPresenters whose DataContext read came back empty (the extender cannot read some types, e.g.
 -- ls.LocaString, and prints an error each time). They are skipped, but retried every RETRY_PASSES passes
--- because rows on a freshly opened screen are briefly empty too. Keyed by tostring(element).
+-- because rows on a freshly opened screen are briefly empty too. Keyed by tostring(element), which is its
+-- address: a list rebuilt after a pick reuses addresses, so the entry holds the element's shape too and a
+-- different element at the same address is read at once.
 local unreadableDC, pass = {}, 0
 local RETRY_PASSES = 10
 
@@ -126,22 +128,79 @@ local function vmField(dc, k)
   return try(getProp, dc, k)
 end
 
+-- Loca handles come with or without their version suffix ("h5e48...;1"); the lookup takes the bare handle
+local function locaText(h)
+  local t = try(Ext.Loca.GetTranslatedString, (h:gsub(";.*$", "")))
+  if type(t) == "string" and t ~= "" and t ~= h then return t end
+  return nil
+end
+local function isHandle(v) return v:match("^h%x+g%x+g") ~= nil end
+local function isStatId(v) return v:find("_", 1, true) ~= nil and not v:find(" ", 1, true) end
+
+-- Stats entry of an id: display name and container ("Target_Command_Halt" -> "Target_Command_Container").
+-- A failed read is not cached: stats can be missing early.
+local statCache = {}
+local function statEntry(id)
+  if type(id) ~= "string" or id == "" then return nil end
+  local e = statCache[id]
+  if e then return e end
+  local st = Ext.Stats and try(Ext.Stats.Get, id)
+  if not st then return nil end
+  local h = try(getField, st, "DisplayName")
+  e = { name = type(h) == "string" and locaText(h) or nil, container = try(getField, st, "SpellContainerID") }
+  statCache[id] = e
+  return e
+end
+
 -- Text of a field value: loca handles and stats ids ("Target_HoldPerson") become the English display name
-local statName = {}
 local function fieldText(v)
   if type(v) ~= "string" or v == "" then return nil end
-  if v:match("^h%x+g%x+g") then return try(Ext.Loca.GetTranslatedString, v) end
-  if v:find("_", 1, true) and not v:find(" ", 1, true) then
-    local s = statName[v]
-    if s == nil then
-      local st = Ext.Stats and try(Ext.Stats.Get, v)
-      local h = st and try(getField, st, "DisplayName")
-      s = (type(h) == "string" and try(Ext.Loca.GetTranslatedString, (h:gsub(";.*$", "")))) or false
-      statName[v] = s
-    end
-    return s or nil
+  if isHandle(v) then return locaText(v) end
+  if isStatId(v) then
+    local e = statEntry(v)
+    return e and e.name
   end
   return v
+end
+
+-- The spell name inside a spell id, for when the stats cannot be read: "Target_Bless_2_AI" -> "Bless",
+-- "Projectile_GuidingBolt" -> "GuidingBolt" (normalizes like "Guiding Bolt"). Variant ids ("Target_Command_Halt")
+-- give nothing here: they resolve through their container.
+local SPELL_KINDS = { Target = true, Projectile = true, Shout = true, Zone = true, Rush = true, Wall = true,
+                      Teleportation = true, Throw = true, Cone = true, ProjectileStrike = true, Multistrike = true }
+local function idStem(id)
+  local kind, rest = id:match("^(%a+)_(.+)$")
+  if not (kind and SPELL_KINDS[kind]) then return nil end
+  rest = rest:gsub("_AI$", ""):gsub("_Container$", ""):gsub("_%d+$", "")
+  if rest:find("_", 1, true) then return nil end
+  return rest
+end
+
+-- Every normalized name a spell view model can stand for: the field texts, and for a stats id its display name,
+-- its container's and the name inside the id
+local SPELL_FIELDS = { "DisplayName", "Name", "Title", "IDString" }
+function BA.HL.SpellNames(vm)
+  local out = {}
+  if type(vm) ~= "userdata" and type(vm) ~= "table" then return out end
+  local function add(s) if type(s) == "string" and s ~= "" then out[BA.Norm(s)] = true end end
+  for _, f in ipairs(SPELL_FIELDS) do
+    local v = vmField(vm, f)
+    if type(v) == "string" and v ~= "" then
+      if isHandle(v) then
+        add(locaText(v))
+      elseif isStatId(v) then
+        local e = statEntry(v)
+        if e then
+          add(e.name)
+          add(statEntry(e.container) and statEntry(e.container).name)
+        end
+        add(idStem(v))
+      else
+        add(v)
+      end
+    end
+  end
+  return out
 end
 
 -- Display label of a view model if it matches a wanted string. A subclass view model also carries a short name
@@ -173,6 +232,67 @@ local NAMED_VM = { ["ls.VMCharacterCreationPassive"] = true, ["ls.VMSelectableFe
 local function isNamedVM(t) return t ~= nil and (NAMED_VM[t] or t:find("VMSelectable", 1, true) ~= nil) end
 
 ------------------------------------------------------------------ rainbow outlines
+-- Spell icon (SpellIconTemplate): Border "border" > Grid "base" > icon Rectangle, hover Grid, level TextBlock.
+-- The Border's own DataContext reads back empty, but the elements inside it read the spell, and so does the list
+-- item's ls.VMSpellReference above it. Icons not in a list (spell replacement slots, the class summary's
+-- preparable spells) have only the elements inside.
+local function isSpellVM(t) return type(t) == "string" and t:match("Spell$") ~= nil end
+
+local function shapeOf(el)
+  local first = try(getChild, el, 1)
+  return tostring(try(getCount, el) or 0) .. "|" .. tostring(first and try(getType, first))
+end
+
+-- The spell view model itself: a VMSpellReference stands for its Spell; nil for other view models
+local function asSpell(dc)
+  local t = dc and try(getType, dc)
+  if t == "ls.VMSpellReference" then return try(getField, dc, "Spell") end
+  if t == nil or isSpellVM(t) then return dc end
+  return nil
+end
+
+-- The spell an icon shows, read from inside the icon (two levels); nil when nothing there reads
+local function iconOwnSpell(border)
+  local own = asSpell(try(getDC, border))
+  if own then return own end
+  local level = { border }
+  for _ = 1, 2 do
+    local deeper = {}
+    for _, e in ipairs(level) do
+      for i = 1, (try(getCount, e) or 0) do
+        local c = try(getChild, e, i)
+        if c then
+          local s = asSpell(try(getDC, c))
+          if s then return s end
+          deeper[#deeper + 1] = c
+        end
+      end
+    end
+    level = deeper
+  end
+  return nil
+end
+
+-- log: Settings.Debug list of "name, name -> ring / no ring" per icon
+local function iconWanted(border, itemSpell, wanted, log)
+  local vm = iconOwnSpell(border)
+  local names = vm and BA.HL.SpellNames(vm) or {}
+  if next(names) == nil and itemSpell then
+    vm = itemSpell
+    names = BA.HL.SpellNames(vm)
+  end
+  local want = false
+  for norm in pairs(names) do if matches(norm, wanted) then want = true end end
+  if log and #log < 200 then
+    local l = {}
+    for norm in pairs(names) do l[#l + 1] = norm end
+    table.sort(l)
+    log[#log + 1] = (vm and (#l > 0 and table.concat(l, ", ") or "(no name read)") or "(no spell)")
+      .. (want and " -> ring" or " -> no ring")
+  end
+  return want
+end
+
 -- Our brushes live on named Rectangles of the hidden resource widget (GUI/Pages/BuildAdvisorRes.xaml). They are
 -- read again on every pass (no long-lived references to game objects).
 local painted = {} -- [tostring(element)] = { prop = "Background" | "BorderBrush", orig = value before us }
@@ -342,22 +462,27 @@ function BA.HL.Apply(wanted, abilityPlan, skillPlan, opts)
   -- Settings.Debug: write what the skill-summary / Change-button search saw to BuildAdvisor_debug.txt
   local debug = BA.Settings and BA.Settings.Debug
   local stack, summaryAnc, commaTexts, panelAnc = {}, nil, {}, nil
-  -- In the spell pickers the icon's "border" has no view model of its own: the spell sits on the ContentPresenter
-  -- two levels up (ls.VMSpellReference, field Spell), which the walk reaches just before the border.
-  local spellRef
+  local spellLog = debug and {} or nil
 
-  local function walk(el, depth, label, once)
+  -- spell: the spell of the list item being walked (from its ls.VMSpellReference ContentPresenter), passed down
+  -- to that item's icon only; false = the item holds no spell (an empty slot)
+  local function walk(el, depth, label, once, spell)
     if budget <= 0 or depth > 80 then return end
     budget = budget - 1
     if debug then stack[depth] = el end
     local ty = try(getType, el)
     if hasWanted and isItemType(ty) then label = itemLabel(el, wanted); once = nil end
     local key = (ty == "ContentPresenter") and tostring(el) or nil
-    if key and (not unreadableDC[key] or pass % RETRY_PASSES == 0) then
+    local shape = key and unreadableDC[key] and shapeOf(el)
+    if key and (not unreadableDC[key] or unreadableDC[key] ~= shape or pass % RETRY_PASSES == 0) then
       local dc = try(getDC, el)
-      unreadableDC[key] = (dc == nil) or nil
+      unreadableDC[key] = (dc == nil) and (shape or shapeOf(el)) or nil
       local dcType = dc and try(getType, dc)
-      if dcType == "ls.VMSpellReference" then spellRef = try(getField, dc, "Spell") end
+      if dcType == "ls.VMSpellReference" then
+        spell = try(getField, dc, "Spell") or false
+      elseif isSpellVM(dcType) then
+        spell = dc
+      end
       if hasWanted and dcType == "ls.VMCharacterCreationSkill" then
         -- skill picker row: Skill = "SleightOfHand"; its name TextBlock is bound
         local sk = try(getField, dc, "Skill")
@@ -386,11 +511,9 @@ function BA.HL.Apply(wanted, abilityPlan, skillPlan, opts)
       end
     end
 
-    -- spell / cantrip icon: the 4-pixel Border around the icon carries the spell's view model
+    -- spell / cantrip icon: the 4-pixel Border "border" of SpellIconTemplate
     if ty == "Border" and try(getName, el) == "border" then
-      local dc = try(getDC, el) or spellRef
-      spellRef = nil
-      local want = hasWanted and vmLabel(dc, wanted) ~= nil
+      local want = hasWanted and iconWanted(el, spell, wanted, spellLog)
       if outline(el, "BorderBrush", A.icon, want, A) then outlines = outlines + 1 end
     end
 
@@ -437,7 +560,7 @@ function BA.HL.Apply(wanted, abilityPlan, skillPlan, opts)
         if tileGrid and try(getName, c) == "frame" and (try(getType, c) or ""):find("NineSlice", 1, true) then
           if outline(el, "Background", A.tile, label ~= nil, A) then outlines = outlines + 1 end
         end
-        walk(c, depth + 1, label, once)
+        walk(c, depth + 1, label, once, spell)
       end
     end
   end
@@ -448,7 +571,9 @@ function BA.HL.Apply(wanted, abilityPlan, skillPlan, opts)
   if debug then
     local out = { "walk: " .. tostring(BA.HL.ms) .. " ms, " .. BA.HL.nodes .. " nodes", "summary found: " .. tostring(skillsHave ~= nil), "changeTB: " .. tostring(changeTB and try(getText, changeTB)),
                   "changeBtn: " .. tostring(changeBtn and try(getType, changeBtn)), "outlines: " .. outlines,
-                  "assets: " .. tostring(A.tile ~= nil) .. " " .. tostring(A.icon ~= nil), "comma texts:" }
+                  "assets: " .. tostring(A.tile ~= nil) .. " " .. tostring(A.icon ~= nil), "spell icons:" }
+    for _, t in ipairs(spellLog) do out[#out + 1] = "  " .. t end
+    out[#out + 1] = "comma texts:"
     for _, t in ipairs(commaTexts) do out[#out + 1] = "  " .. t end
     local function dump(e, d)
       if d > 16 or #out > 4000 then return end

@@ -135,6 +135,17 @@ MOCK_MUTATIONS = [
     ("Highlighter.lua: a row under the game's short name is not found again (never updated or restored)",
      {"Highlighter.lua": [("bare == BA.Norm(name) or bare == BA.Norm(ABILITY_KEY[name] or name)",
                            "bare == BA.Norm(name)")]}),
+    ("Highlighter.lua: a loca handle with its version (h...;1) is looked up as is (Bless not ringed)",
+     {"Highlighter.lua": [('local t = try(Ext.Loca.GetTranslatedString, (h:gsub(";.*$", "")))',
+                           "local t = try(Ext.Loca.GetTranslatedString, h)")]}),
+    ("Highlighter.lua: spell icons only read the list item (replacement slots, unreadable items not ringed)",
+     {"Highlighter.lua": [("local vm = iconOwnSpell(border)", "local vm = nil")]}),
+    ("Highlighter.lua: a rebuilt list item at an address read empty before waits for the retry pass",
+     {"Highlighter.lua": [("unreadableDC[key] ~= shape or ", "")]}),
+    ("Highlighter.lua: a spell id without stats names nothing (Guiding Bolt not ringed)",
+     {"Highlighter.lua": [("        add(idStem(v))", "        add(nil)")]}),
+    ("Highlighter.lua: a container variant does not name its container",
+     {"Highlighter.lua": [("          add(statEntry(e.container) and statEntry(e.container).name)", "")]}),
 ]
 
 DESCRIPTION_MUTATIONS = [

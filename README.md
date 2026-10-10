@@ -60,7 +60,7 @@ English localisation and stats that the sibling `../LootAdvisor` extracts, so ru
 `build_cache.py` and `stats.py`) first; a new build also needs a profile in `../LootAdvisor/tools/build_profiles.py`:
 
 ```bash
-python tools/check_hl.py        # 0 unknown labels, 0 plan errors
+python tools/check_hl.py        # 0 unknown labels, 0 plan errors, 0 spell icon errors
 python ../BG3Tools/tools/build_pak.py BuildAdvisor   # -> dist/BuildAdvisor.pak + the player package dist/BuildAdvisor/
 python ../BG3Tools/tools/ci_release.py check BuildAdvisor   # what CI runs: build, zip the package, check it against INSTALL.md
 ```
@@ -90,7 +90,7 @@ The outline textures are built with `python ../LootAdvisor/tools/make_la_gui.py 
 
 ## Tests
 `python tools/run_tests.py` (needs `pip install lupa`) runs the mod against a mocked Script Extender (`tools/mock_test.lua`,
-`tools/ui_gate_test.lua`; add a scenario there for new behaviour). The mock covers character creation, level-up, respec, origin, party view, the highlighter (stars, outlines, point-buy and ability-improvement targets, feat choices, spell swaps, restoring) and the hotkey.
+`tools/ui_gate_test.lua`; add a scenario there for new behaviour). The mock covers character creation, level-up, respec, origin, party view, the highlighter (stars, outlines, spell icons as each spell list and picked / prepared row builds them, point-buy and ability-improvement targets, feat choices, spell swaps, restoring) and the hotkey.
 
 ## Releases
 Versions are SemVer tags `vX.Y.Z`; the first release is `v0.9.0` (set by `release-as` in
