@@ -2,8 +2,9 @@
 -- Noesis renders in parallel with Lua, so before Script Extender v33 (no Ext.UI.Defer) the mod must leave the tree
 -- alone unless the player opts in (UnsafeUiOnOldSE), and with Ext.UI.Defer every touch must happen inside the
 -- deferred callback. Run by tools/run_tests.py, once per scenario:
---   ROOT, DEFER (bool), UNSAFE (bool), PATCHES ({ [file name] = { {old, new}, ... } }), MENU (bool: the game's
---   pause menu widget is open during the first ticks, then closed) -> result table
+--   ROOT, DEFER (bool), UNSAFE (bool), PATCHES ({ [file name] = { {old, new}, ... } }), MENU (the x:Name of a
+--   game widget that hides the window, e.g. "GameMenu" or the message box "Dialog_box", or nil: open during the
+--   first ticks, then closed) -> result table
 local ROOT, DEFER, UNSAFE, PATCHES, MENU = ...
 local LUA = ROOT .. "/BuildAdvisor/Mods/BuildAdvisor/ScriptExtender/Lua/"
 
@@ -35,7 +36,7 @@ local function el(text, kids, ty, name, props)
 end
 local uiKids = { el("Half-Orc"), el("Human"), el(nil, { el("Paladin"), el("Sorcerer") }), el("Athletics") }
 local uiRoot = el(nil, uiKids)
-if MENU then uiKids[#uiKids + 1] = el(nil, { el(nil, {}, "ls.UIWidget", "GameMenu", { Visibility = "Visible" }) }) end
+if MENU then uiKids[#uiKids + 1] = el(nil, { el(nil, {}, "ls.UIWidget", MENU, { Visibility = "Visible" }) }) end
 
 -- IMGUI window: any Add* call returns another node; the window counts renders through AddText
 local function node()

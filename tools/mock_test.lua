@@ -358,6 +358,20 @@ entities.CCLevelUpDefinition = nil
 tick()
 expect(strNm.Text == "Strength", "ASI row restored when the level-up closes")
 
+-- 11b) a bracket text too long for the name column (the row's "-" button covered "Constitution (16, +1") uses the
+-- game's short name; the row is still found under it on the next pass and restored to the full name
+local conRowB, conNmB = abilityRow("Constitution")
+local chaRowB, chaNmB = abilityRow("Charisma")
+setRoot({ conRowB, chaRowB })
+BA.HL.Apply({}, { CON = { final = 16, bonus = 1 }, CHA = { final = 17, bonus = 2 } })
+expect(conNmB.Text == "CON (16, +1)", "long point-buy bracket uses the short name: " .. tostring(conNmB.Text))
+expect(chaNmB.Text == "Charisma (17, +2)", "a bracket that fits keeps the full name: " .. tostring(chaNmB.Text))
+BA.HL.Apply({}, { CON = { final = 15, bonus = 0 }, CHA = { final = 17, bonus = 2 } })
+expect(conNmB.Text == "Constitution (15)", "short-named row found again and updated: " .. tostring(conNmB.Text))
+BA.HL.Apply({}, { CON = { final = 16, bonus = 1 } })
+BA.HL.Apply({}, nil)
+expect(conNmB.Text == "Constitution", "short-named row restored to the full name: " .. tostring(conNmB.Text))
+
 -- 12) Spell swap: Storm Sorcerer 6 -> 7 (stormsorc: Lightning Bolt; replace Witch Bolt with Counterspell)
 local wb, cs, lb, mm = spellIcon("Witch Bolt"), spellIcon("Counterspell"), spellIcon("Lightning Bolt"), spellIcon("Magic Missile")
 setRoot({ assets, wb, cs, lb, mm, nel("Metamagic: Quickened Spell") })
