@@ -190,8 +190,30 @@ function BA.Analyse(ctx, build)
   elseif step and step.cls == "Cleric" and build.deity then
     addHl(build.deity) -- a first Cleric level taken at level-up also asks for a deity
   end
+  -- every level-up of a prepared caster shows Prepare Spells again: ring what the plan prepared at earlier levels too
+  if ctx.mode == "Level Up" then
+    for i = 1, n - 1 do
+      for _, s in ipairs(BA.PreparedPicks(build.levels[i])) do addHl(s) end
+    end
+  end
   a.highlight = hl
   return a
+end
+
+-- The menu labels of a level's "Prepare: A, B (note)" line, taken from its star list so the spelling matches the menu
+function BA.PreparedPicks(step)
+  local want = {}
+  for _, line in ipairs(step and step.picks or {}) do
+    local list = tostring(line):match("^Prepare:%s*(.*)$")
+    if list then
+      for name in list:gsub("%b()", ""):gmatch("[^,]+") do want[BA.Norm(name)] = true end
+    end
+  end
+  local out = {}
+  for _, s in ipairs(step and step.hl or {}) do
+    if want[BA.Norm(s)] then out[#out + 1] = s end
+  end
+  return out
 end
 
 -- Planned ability scores after character level n: point buy + racial bonus + every planned raise up to n
