@@ -9,6 +9,10 @@ dist/
 # Script Extender IDE helpers (README "Lua tooling"), fetched locally
 .ide/
 
+# in-game test screenshots (incl. stray shot.sh files at the root)
+shots/
+/shots$*
+
 # python / node / editor clutter
 __pycache__/
 *.pyc
