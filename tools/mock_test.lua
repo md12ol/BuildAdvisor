@@ -590,6 +590,18 @@ local lv = { mode = "Level Up", level = 5, name = "Lae'zel", origin = "Laezel", 
 out = BA.UI.Outline(lv, lzEntry, BA.Analyse(lv, lzEntry.build))
 local items = rowsOf(out.main, "item")
 expect(items[1] == "Level 5: Fighter" and #items == 1, "level-up: only this level's class and picks: " .. tostring(items[1]))
+local lq
+for _, b in ipairs(BA.Builds) do if b.id == "lightquick" then lq = b end end
+local lvc = { mode = "Level Up", level = 2, name = "Tav", race = { display = "Rock Gnome" },
+  pendingClass = { name = "Cleric" }, classes = { { name = "Cleric", display = "Cleric", level = 1 } } }
+local hlc = BA.Analyse(lvc, lq).highlight
+expect(hlc[BA.Norm("Bless")] and hlc[BA.Norm("Healing Word")] and hlc[BA.Norm("Shield of Faith")],
+  "level-up Prepare Spells: the spells the plan prepared at level 1 are ringed again at level 2")
+expect(not hlc[BA.Norm("Guidance")] and not hlc[BA.Norm("Medicine")],
+  "level-up: earlier cantrips and skills are not starred again")
+lvc.level = 3
+hlc = BA.Analyse(lvc, lq).highlight
+expect(hlc[BA.Norm("Spiritual Weapon")] and hlc[BA.Norm("Bless")], "level-up to 3: this level's and earlier prepared spells")
 
 -- 16) placement: beside the game's left panel in the menus, the old spot outside, the player's move kept
 local pos1, size1 = BA.UI.DockRect(2560, 1600)

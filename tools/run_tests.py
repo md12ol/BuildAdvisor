@@ -143,6 +143,8 @@ def description_failures(text):
 
 # tools/mock_test.lua must report failures with these
 MOCK_MUTATIONS = [
+    ("Advisor.lua: a level-up rings only that level's picks (earlier prepared spells plain on Prepare Spells)",
+     {"Advisor.lua": [('if ctx.mode == "Level Up" then', 'if false then')]}),
     ("Highlighter.lua: a long point-buy bracket keeps the full name (runs under the row's - button)",
      {"Highlighter.lua": [("if #t > ABILITY_TEXT_MAX and ABILITY_KEY[name] then", "if false then")]}),
     ("Highlighter.lua: a row under the game's short name is not found again (never updated or restored)",
