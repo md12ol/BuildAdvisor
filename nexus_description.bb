@@ -12,7 +12,7 @@ Build Advisor shows a strong community build (Patch 8 meta) for your character a
 [size=4][b]How it shows the build[/b][/size]
 [list]
 [*][b]In the game menus:[/b] every choice the build wants on the current screen gets a star: race, subrace, class, subclass, background, deity, skills and expertise, feats and their own choices, spells and cantrips, spells to prepare, the spell to replace, fighting styles, manoeuvres, invocations, metamagic and more. Tiles and spell icons also get a rainbow outline. Point-buy rows and Ability Improvement rows show the target score, e.g. "Strength (17, +2)".
-[*][b]Advisor window (F7):[/b] the build, a "DO THIS NOW" list for the current level, [OK] / [CHANGE] checks for your race, class and point-buy, and the full level 1-12 plan.
+[*][b]Advisor window (F7):[/b] the build, a short "Do this now" list for the current screen, what already matches the plan and what to change, and the full level 1-12 plan. In creation, respec and level-up it sits beside the game's selection panel, as tall as it.
 [/list]
 
 [size=4][b]Builds included[/b][/size]

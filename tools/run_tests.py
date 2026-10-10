@@ -146,6 +146,18 @@ MOCK_MUTATIONS = [
      {"Highlighter.lua": [("        add(idStem(v))", "        add(nil)")]}),
     ("Highlighter.lua: a container variant does not name its container",
      {"Highlighter.lua": [("          add(statEntry(e.container) and statEntry(e.container).name)", "")]}),
+    ("Window.lua: the class's skills repeated next to the full skills line",
+     {"Window.lua": [('if not (creation and p:find("^Skills:")) then', "if true then")]}),
+    ("Window.lua: a locked race shown as the build's whole race list",
+     {"Window.lua": [("if BA.RaceLocked(ctx) and ctx.race then", "if false then")]}),
+    ("Window.lua: choices off the plan get no row of their own",
+     {"Window.lua": [("for _, chk in ipairs(fix) do", "for _, chk in ipairs({}) do")]}),
+    ("Window.lua: the window is not docked beside the game's left panel in the menus",
+     {"Window.lua": [("BA.UI.Place(BA.IsCreationMode(ctx))", "BA.UI.Place(false)")]}),
+    ("Window.lua: the dock ignores the panel's top",
+     {"Window.lua": [("return { left, PANEL_TOP * s }", "return { left, 0 }")]}),
+    ("Window.lua: the player's move is not noticed (window put back)",
+     {"Window.lua": [("elseif p.seen then", "elseif false then")]}),
 ]
 
 DESCRIPTION_MUTATIONS = [

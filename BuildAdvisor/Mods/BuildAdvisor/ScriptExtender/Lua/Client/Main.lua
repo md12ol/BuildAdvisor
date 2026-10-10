@@ -87,6 +87,7 @@ local function onTick()
   if now - lastDetect >= DETECT_INTERVAL_MS then
     lastDetect = now
     BA.Refresh(false)
+    pcall(BA.UI.Watch)
   end
   if BA.Settings.Highlight and now - lastHighlight >= HIGHLIGHT_INTERVAL_MS then
     lastHighlight = now
