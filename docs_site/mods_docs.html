@@ -275,7 +275,6 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
             <li><a href="#la-status">Current status</a></li>
           </ol>
         </li>
-        <li><a class="top" href="#roadmap">Roadmap</a></li>
       </ol>
     </nav>
   </aside>
@@ -290,7 +289,6 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
             <ol><li><a href="#ba-install">Install</a></li><li><a href="#ba-window">The advisor window</a></li><li><a href="#ba-how">How it works</a></li><li><a href="#ba-faq">FAQ</a></li><li><a href="#ba-status">Status</a></li></ol></li>
           <li><a href="#lootadvisor">Loot Advisor</a>
             <ol><li><a href="#la-install">Install</a></li><li><a href="#la-signs">Signs in the game</a></li><li><a href="#la-list">The item list (F6)</a></li><li><a href="#la-page">The Sets page</a></li><li><a href="#la-how">How items are picked</a></li><li><a href="#la-faq">FAQ</a></li><li><a href="#la-status">Status</a></li></ol></li>
-          <li><a href="#roadmap">Roadmap</a></li>
         </ol>
       </nav>
     </details>
@@ -494,6 +492,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
 
       <h3 id="ba-status">Current status</h3>
       <ul class="log">
+        <li><time>2026-10-10</time><span>The menu marks now go through Script Extender v33's safe interface call, which removes a rare crash while menus are rebuilt; on older Script Extender only the window is shown.</span></li>
         <li><time>2026-10-09</time><span>Shadowheart's first build is now Light Domain Cleric 9 / Sorcerer 3 (Quickened Spell): checked in game, Radiance of the Dawn scales with her total level, so the Sorcerer levels cost it nothing. Light Domain Cleric 12 is her second.</span></li>
         <li><time>2026-10-09</time><span><b>22 builds and a mark on every choice</b> <span class="pill unv">not yet checked in game</span> New first builds for Gale (Evocation Wizard 10 / Tempest Cleric 2) and Lae'zel (Battle Master with Giantslayer and an advantage source); third builds for Karlach (Berserker 7 / Thief 3 / Fighter 2) and Wyll (Hexblade Sorlock); a second build for Shadowheart (Light Cleric 9 / Sorcerer 3); a fixed list for the Dark Urge. Stars on background, deity and feat choices; rainbow outlines on tiles and spell icons; targets on level-up ability rows. Labels now match the game's exact wording ("Agonising Blast", "Giant", "Evocation"), and several level plans were corrected (spells per level, metamagic levels, free oath spells).</span></li>
         <li><time>2026-10-09</time><span>Astarion's first build is now Gloom Stalker 5 / Battle Master 3 / Thief 4 with two hand crossbows (S+); the longbow Assassin version is his second. Lockadin's gear line names the Sword of Chaos; Storm Sorcerer's names the Hat of Storm Scion's Power.</span></li>
@@ -534,7 +533,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
       <div class="facts">
         <div class="fact"><span class="eyebrow">Needs</span><b>Script Extender v33+</b><br><small>for frames and map painting; the list and Sets page work on v32</small></div>
         <div class="fact"><span class="eyebrow">Optional</span><b>Build Advisor</b><br><small>your build pick there is used to break ties</small></div>
-        <div class="fact"><span class="eyebrow">Disk</span><b>3.75 MB pak</b><br><small>+ about 18 MB for the Sets page, built on first load</small></div>
+        <div class="fact"><span class="eyebrow">Disk</span><b>1.2 MB pak</b><br><small>+ about 18 MB for the Sets page, built on first load</small></div>
       </div>
       <ol class="steps">
         <li>Install Script Extender. Item frames and map painting need v33 or newer. Until v33 is a normal release, get it from the Devel channel: create a file <code>ScriptExtenderUpdaterConfig.json</code> in the game's <code>bin</code> folder containing <code>{"UpdateChannel": "Devel"}</code>, then start the game once. Delete that file to go back to normal releases.</li>
@@ -567,7 +566,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
         <div class="row"><span class="ic"></span><span class="cy">Sword of Chaos<br>Helldusk Gloves<br>Elixir of Viciousness</span></div>
       </div>
       <div class="prose">
-        <p>The label shows the rainbow diamond and a plain list of the items you can get there, one per line, in the same cyan as the tooltip advice. A character's name is added only when markers cover several characters (planned, see the <a href="#roadmap">Roadmap</a>). Hovering the marker shows a <b>Loot Advisor</b> title with the rainbow diamond above that list.</p>
+        <p>The label shows the rainbow diamond and a plain list of the items you can get there, one per line, in the same cyan as the tooltip advice. When a marker covers several characters, each item is followed by the names it is for. Hovering the marker shows a <b>Loot Advisor</b> title with the rainbow diamond above that list.</p>
       </div>
       <div class="prose">
         <p>Markers show the <b>best and runner-up item per slot for the current act</b>, for the character you have selected. Select someone else and the markers switch to that character. Once the party owns an item, its marker disappears; the frame stays.</p>
@@ -835,6 +834,8 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
       <h3 id="la-status">Current status</h3>
       <p class="prose"><span class="pill ok">working in game</span> <span class="pill plan">not released yet</span></p>
       <ul class="log">
+        <li><time>2026-10-10</time><span><b>Markers for everyone</b>: the map marks the items of the whole party, the camp, companions who may still join, Tavs and hirelings, one marker per spot listing whose items they are; a marker filter and tie picks in the F6 list and on the Sets page. A spoiler warning in the F6 list and on the Sets page. Item warnings in tooltips now take up to three lines without losing a detail. The pak is compressed (about 1.2 MB).</span></li>
+        <li><time>2026-10-10</time><span><b>Crash fixed</b>: the interface pass could read a menu element the game had just freed and crash the game in combat. All interface changes now go through Script Extender v33's safe call; checked in the game with ten combat rounds and no crash.</span></li>
         <li><time>2026-10-09</time><span><b>Shorter advice, checked in the game</b>: tooltip advice is one row of at most two lines with the rainbow diamond, in cyan (bags, both sides of trade, pickpocketing, corpse loot, camp chest); map labels list only the item names; the marker popup has a "Loot Advisor" title; items shown only in the list get no frame and no tooltip row.</span></li>
         <li><time>2026-10-09</time><span><b>One owner rule everywhere</b>: contested items are decided among the active party in the item list, tooltips and markers too, as on the Sets page; a companion waiting in camp no longer takes an item away. <kbd>F6</kbd> gained <b>Open Sets page</b>, which shows the page's path ready to copy.</span></li>
         <li><time>2026-10-09</time><span><b>Data fixes and automatic tests</b>: no heavy body armour for builds that rage, Cleric weapon proficiencies (Morningstar, Flail) read from the game's class data, subclass names exactly as the game shows them, every one of the 22 Build Advisor builds covered. A regression suite guards each fix.</span></li>
@@ -845,7 +846,6 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
         <li><time>2026-10-09</time><span><b>First full mod in game:</b> selection and build matching, story gating, rainbow frames and markers, 5-arrow limit, "better on X", tooltip text, the F6 list.</span></li>
         <li><time>2026-10-08</time><span>Rainbow frame and map designs chosen; feasibility confirmed in game.</span></li>
       </ul>
-      <p class="prose"><b>Planned:</b> see the <a href="#roadmap">Roadmap</a>.</p>
 
       <details class="dev">
         <summary>For the developer <span class="muted">source files and data flow</span></summary>
@@ -872,28 +872,8 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
       </details>
     </section>
 
-    <!-- ============================================================ ROADMAP -->
-    <section class="chapter" id="roadmap" aria-labelledby="rm-h">
-      <div class="chapter-head"><h2 id="rm-h">Roadmap</h2></div>
-      <div class="prose">
-        <p class="lede">What is decided, in the order it is planned. Nothing here is in the mods yet; each step moves to its mod's status list when it lands.</p>
-      </div>
-      <div class="tw"><table>
-        <thead><tr><th>Step</th><th>Mod</th><th>Planned</th><th>What it means for you</th></tr></thead>
-        <tbody>
-          <tr><td class="nw num">Now</td><td class="nw">Both</td><td><b>Mechanics check in the game</b></td><td>One test session that tries each rule the builds rely on and reads the result from the game. Confirmed so far: Radiance of the Dawn adds your total character level, Hexblade's Curse adds to every Eldritch Blast beam, Destructive Wrath maximises every Chain Lightning target and Markoheshkir's item spells, Sharpshooter and Two-Weapon Fighting work on off-hand hand crossbows. Still to check: two Enraged Throws per turn, Great Weapon Master on throws, whether Wyll can take the Hexblade, and Build Advisor's stars, outlines and targets in creation, level-up and respec. Builds then move up or stay where they are.</td></tr>
-          <tr><td class="nw num">1</td><td class="nw">Loot Advisor</td><td><b>Optimised sets, tested in the game</b></td><td>An "Optimised" set per build and act, found by searching item combinations with a damage, defence and spell model (party ownership of unique items, situational effects, item spells, a respec tuned to each set). The model is built; its sets stay off every page until a test arena in the game confirms them: fixed target dummies per act, a boss, a pack, a defence fight and a long day, the biggest disagreements with the current sets first.</td></tr>
-          <tr><td class="nw num">2</td><td class="nw">Loot Advisor</td><td><b>Markers for everyone</b></td><td>Map markers for every party member, companions waiting in camp, companions who can still join, and your Tavs and hirelings (closest build by class, or scoring by main ability, instead of "not covered"). One marker per item, labelled with all the names that want it; companions who are gone for good are left out. A marker filter (everyone, party, selected), ties picked by you in the item list or on the Sets page, and recommendations on the Sets page for your active party. Off-screen arrows stay at the 5 best items for the selected character.</td></tr>
-          <tr><td class="nw num">3</td><td class="nw">Loot Advisor</td><td><b>Sets tested in game</b></td><td>Test saves with one bag per set in the camp chest (top three sets per character and act), each set equipped once to confirm it works and that the page's numbers match the game's.</td></tr>
-          <tr><td class="nw num">4</td><td class="nw">Sets page (local only)</td><td><b>3D models for every set</b></td><td>Each set on a rotatable 3D model built from the game's own models. It uses the game's meshes and textures, so it runs only as a local preview on the computer that has the game, and is never shipped or shared.</td></tr>
-          <tr><td class="nw num">Next</td><td class="nw">All</td><td><b>First release, v0.9.0 (beta)</b></td><td>The download is ready to build: each release packs the pak, install steps, a player version of this handbook (without developer notes), the Sets page and the pictures into one zip on GitHub, and on Nexus once its mod pages exist. v0.9.0 is published once the changes in progress are merged; 1.0.0 comes with the public Nexus release.</td></tr>
-        </tbody>
-      </table></div>
-      <p class="prose muted">Also decided: builds that follow the story (Shadowheart's Shar or Selûne path, the Dark Urge accepting or refusing Bhaal) switch with the path your game is on, and show the best overall build before the choice.</p>
-    </section>
-
     <footer class="foot">
-      <p>Written from the mods' own code and test results, 9 October 2026. Baldur's Gate 3 is a game by Larian Studios; screenshots show the mods running in the game. Script Extender is a separate community project.</p>
+      <p>Written from the mods' own code and test results, 10 October 2026. Baldur's Gate 3 is a game by Larian Studios; screenshots show the mods running in the game. Script Extender is a separate community project.</p>
     </footer>
   </main>
 </div>
