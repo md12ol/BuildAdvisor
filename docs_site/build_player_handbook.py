@@ -76,7 +76,6 @@ RULES = [
      "had the least testing. If one looks wrong, untick <i>Highlight in game menus</i>; the window still shows the "
      "plan.</li>"),
     # --- Loot Advisor
-    ("LootAdvisor", r' \(planned, see the <a href="#roadmap">Roadmap</a>\)', " (planned)"),
     ("LootAdvisor", r"Before release: scoring every item", "How the advice was made: scoring every item"),
     ("LootAdvisor", r"<b>Community consensus\.</b>", "<b>Community picks.</b>"),
     ("LootAdvisor", r">Settings and the dev toggle<", ">Settings<"),
