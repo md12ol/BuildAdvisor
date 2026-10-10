@@ -78,9 +78,12 @@ function BA.Refresh(force)
   end
 end
 
-local lastDetect, lastHighlight = 0, 0
+local lastDetect, lastHighlight, lastMenu = 0, 0, 0
 local function onTick()
   local now = Ext.Utils.MonotonicTime()
+  -- the advisor window steps aside while the game's pause menu is open (read in the deferred UI update)
+  if now - lastMenu >= 100 then lastMenu = now; BA.HL.Run(BA.HL.CheckMenu) end
+  pcall(BA.UI.SetMenuHidden, BA.HL.menuOpen == true)
   if now - lastDetect >= DETECT_INTERVAL_MS then
     lastDetect = now
     BA.Refresh(false)

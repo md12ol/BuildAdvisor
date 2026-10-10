@@ -71,6 +71,36 @@ function BA.HL.Run(fn)
   return false
 end
 
+-- The game's pause menu (Esc) and the pages it opens (options, save, load) are widgets on the UI's Pause layer,
+-- named by the x:Name of their XAML page (GameMenu.xaml: "GameMenu"). Script Extender windows draw over every game
+-- widget, so the advisor window hides while one of them is shown. Run through BA.HL.Run only: sets
+-- BA.HL.menuOpen. The widgets sit a few levels below ContentRoot; their insides are not walked.
+BA.HL.PAUSE_WIDGETS = { GameMenu = true, GameOptions = true, InterfaceOptions = true, AccessibilityOptions = true,
+                        ConnectivityMenu = true, LoadGame = true, SaveGame = true }
+function BA.HL.CheckMenu()
+  local root = try(Ext.UI.GetRoot)
+  if not root then return end
+  local content = try(function() return root:Find("ContentRoot") end) or root
+  local open, budget = false, 400
+  local function go(e, d)
+    if open or budget <= 0 then return end
+    budget = budget - 1
+    if tostring(try(getType, e)):find("UIWidget", 1, true) then
+      -- an unreadable Visibility counts as shown: the widget only exists while its state is on the stack
+      local v = try(getProp, e, "Visibility")
+      if BA.HL.PAUSE_WIDGETS[try(getName, e) or ""] and (v == nil or tostring(v) == "Visible") then open = true end
+      return
+    end
+    if d >= 4 then return end
+    for i = 1, (try(getCount, e) or 0) do
+      local c = try(getChild, e, i)
+      if c then go(c, d + 1) end
+    end
+  end
+  go(content, 0)
+  BA.HL.menuOpen = open
+end
+
 local function stripMark(t)
   if t:sub(1, #MARK) == MARK then return t:sub(#MARK + 1), true end
   return t, false

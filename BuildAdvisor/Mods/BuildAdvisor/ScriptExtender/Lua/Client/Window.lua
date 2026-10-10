@@ -95,8 +95,29 @@ end
 
 local placeDefault -- defined below, next to Show
 
+-- While the game's pause menu is open the window is closed and remembered (BA.UI.reopen), then opened again; the
+-- hotkey and the screen auto-open only change what happens after the menu.
+function BA.UI.SetMenuHidden(on)
+  local w = BA.UI.window
+  if not w or BA.UI.menuHidden == on then return end
+  BA.UI.menuHidden = on
+  if on then
+    BA.UI.reopen = w.Open == true
+    w.Open = false
+  elseif BA.UI.reopen then
+    BA.UI.reopen = false
+    w.Open = true
+    BA.Refresh(true)
+  end
+end
+
 function BA.UI.Toggle()
   if not BA.UI.window then return end
+  if BA.UI.menuHidden then
+    BA.UI.reopen = not BA.UI.reopen
+    BA.UI.userClosed = not BA.UI.reopen
+    return
+  end
   if not BA.UI.window.Open and not BA.UI.placed then placeDefault(BA.UI.window); BA.UI.placed = true end
   BA.UI.window.Open = not BA.UI.window.Open
   BA.UI.userClosed = not BA.UI.window.Open
@@ -117,6 +138,7 @@ end
 
 function BA.UI.Show()
   local w = BA.UI.window
+  if BA.UI.menuHidden then BA.UI.reopen = true; return end
   if w and not w.Open then
     if not BA.UI.placed then placeDefault(w); BA.UI.placed = true end
     w.Open = true
@@ -125,6 +147,7 @@ function BA.UI.Show()
 end
 
 function BA.UI.Hide()
+  if BA.UI.menuHidden then BA.UI.reopen = false; return end
   if BA.UI.window and BA.UI.window.Open then BA.UI.window.Open = false end
 end
 
