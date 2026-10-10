@@ -72,11 +72,14 @@ function BA.HL.Run(fn)
 end
 
 -- The game's pause menu (Esc) and the pages it opens (options, save, load) are widgets on the UI's Pause layer,
--- named by the x:Name of their XAML page (GameMenu.xaml: "GameMenu"). Script Extender windows draw over every game
--- widget, so the advisor window hides while one of them is shown. Run through BA.HL.Run only: sets
--- BA.HL.menuOpen. The widgets sit a few levels below ContentRoot; their insides are not walked.
+-- named by the x:Name of their XAML page (GameMenu.xaml: "GameMenu"). The game's message boxes (the respec "lose
+-- progress?" confirmation, the new game's tutorial question) are the widget of MessageBox.xaml, "Dialog_box", and
+-- MessageBox_c.xaml on a controller. Script Extender windows draw over every game widget, so the advisor window
+-- hides while one of them is shown. Run through BA.HL.Run only: sets BA.HL.menuOpen. The widgets sit a few levels
+-- below ContentRoot; their insides are not walked.
 BA.HL.PAUSE_WIDGETS = { GameMenu = true, GameOptions = true, InterfaceOptions = true, AccessibilityOptions = true,
-                        ConnectivityMenu = true, LoadGame = true, SaveGame = true }
+                        ConnectivityMenu = true, LoadGame = true, SaveGame = true,
+                        Dialog_box = true, MessageBox_c = true }
 function BA.HL.CheckMenu()
   local root = try(Ext.UI.GetRoot)
   if not root then return end
@@ -236,6 +239,8 @@ end
 -- Point-buy rows (character creation / respec) and the ability rows of Ability Improvement and of feats with an
 -- ability choice (level-up) have an ls.VMAbility DataContext (Ability = "Strength"). The ability name gets the
 -- plan appended: "Strength (17, +2)" = reach 17, the +2 goes here; "Dexterity (10)" = no bonus. Never a star.
+-- The name column holds about 18 characters before the row's "-" button: "Charisma (17, +2)" fits, "Constitution
+-- (16, +1)" ran under the button. A longer text uses the game's short name instead: "CON (16, +1)".
 
 local ABILITY_KEY = { Strength = "STR", Dexterity = "DEX", Constitution = "CON", Intelligence = "INT", Wisdom = "WIS", Charisma = "CHA" }
 
@@ -246,6 +251,14 @@ local function abilitySuffix(plan)
   local s = " (" .. plan.final
   if plan.bonus > 0 then s = s .. ", +" .. plan.bonus end
   return s .. ")"
+end
+
+local ABILITY_TEXT_MAX = 18
+local function abilityText(name, plan)
+  if not plan then return name end
+  local t = name .. abilitySuffix(plan)
+  if #t > ABILITY_TEXT_MAX and ABILITY_KEY[name] then t = ABILITY_KEY[name] .. abilitySuffix(plan) end
+  return t
 end
 
 -- row: the element holding the VMAbility DataContext; plan: { final, bonus } or nil.
@@ -261,7 +274,8 @@ local function decorateAbilityRow(row, name, plan, onlyPlanned)
     if not nameTB and isTextType(ty) then
       local t = try(getText, el)
       if type(t) == "string" and t ~= "" and t ~= BOUND_PLACEHOLDER and not t:match("^%d+$") then
-        if BA.Norm(stripAbilitySuffix(t)) == BA.Norm(name) then nameTB = el; current = t end
+        local bare = BA.Norm(stripAbilitySuffix(t))
+        if bare == BA.Norm(name) or bare == BA.Norm(ABILITY_KEY[name] or name) then nameTB = el; current = t end
       elseif (t == nil or t == "" or t == BOUND_PLACEHOLDER) and parentTy == "Control" and not boundName then
         boundName = el
       end
@@ -274,7 +288,7 @@ local function decorateAbilityRow(row, name, plan, onlyPlanned)
   scan(row, 0, nil)
   local target = nameTB or boundName
   if not (target and hasButton) then return false end
-  local text = name .. (plan and abilitySuffix(plan) or "")
+  local text = abilityText(name, plan)
   if onlyPlanned and not plan and not (current and current ~= name) then return true end -- untouched row
   if current ~= text then try(setText, target, text) end
   return true

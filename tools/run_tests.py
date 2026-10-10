@@ -2,13 +2,15 @@
 
   python tools/run_tests.py            tools/mock_test.lua, the UI-thread gate (tools/ui_gate_test.lua) and the
                                        meta.lsx Description check
-  python tools/run_tests.py --mutate   the gate with its guard removed and broken descriptions (patched in memory):
-                                       must go red
+  python tools/run_tests.py --mutate   the gate with its guard removed, the mock test on a patched copy of the mod's
+                                       Lua and broken descriptions: must go red
 """
 import html
 import os
 import re
+import shutil
 import sys
+import tempfile
 
 import lupa
 
@@ -20,12 +22,41 @@ def lua_file(name):
         return f.read()
 
 
-def mock_test():
+def mock_test(mod_root=None, quiet=False):
     lua = lupa.LuaRuntime()
-    return lua.execute(lua_file("mock_test.lua").replace("local ROOT = ...", 'local ROOT = "%s"' % root))
+    if quiet:
+        lua.execute("print = function() end")
+    return lua.execute(lua_file("mock_test.lua").replace("local ROOT = ...", 'local ROOT = "%s"' % (mod_root or root)))
 
 
-def gate(defer, unsafe, patches, menu=False):
+LUA_REL = ("BuildAdvisor", "Mods", "BuildAdvisor", "ScriptExtender", "Lua")
+
+
+def mock_failures(patches):
+    """tools/mock_test.lua on a copy of the mod's Lua with the patches applied; returns its failure count."""
+    tmp = tempfile.mkdtemp(prefix="ba_mut_")
+    try:
+        lua_dir = os.path.join(tmp, *LUA_REL)
+        shutil.copytree(os.path.join(root, *LUA_REL), lua_dir)
+        for name, subs in patches.items():
+            path = next(os.path.join(d, name) for d, _, fs in os.walk(lua_dir) if name in fs)
+            src = open(path, encoding="utf-8", newline="").read()
+            for old, new in subs:
+                if old not in src:
+                    raise RuntimeError(f"mutation target not found in {name}: {old[:60]}")
+                src = src.replace(old, new)
+            open(path, "w", encoding="utf-8", newline="").write(src)
+        return mock_test(tmp.replace("\\", "/"), quiet=True)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+# game widgets the advisor window steps aside for (x:Name of the XAML page): the pause menu, the message box
+# (MessageBox.xaml: confirmations such as the respec warning) and its controller version
+MENU_WIDGETS = [("GameMenu", "pause menu"), ("Dialog_box", "message box"), ("MessageBox_c", "controller message box")]
+
+
+def gate(defer, unsafe, patches, menu=None):
     lua = lupa.LuaRuntime()
     fn = lua.eval("function(...) return load(...) end")(lua_file("ui_gate_test.lua"), "@ui_gate_test.lua")
     lua_patches = lua.table_from({k: lua.table_from([lua.table_from(p) for p in v]) for k, v in patches.items()})
@@ -36,8 +67,9 @@ def gate_failures(patches=None):
     """Old Script Extender: the tree is never touched, one log line names v33, the advisor window still renders.
     Ext.UI.Defer present: every touch is inside the deferred callback and the walk reaches the menu labels.
     Old Script Extender with UnsafeUiOnOldSE: the walk runs.
-    The game's pause menu open (Ext.UI.Defer present): the window is closed under it, the hotkey there does not open
-    it, and it comes back when the menu closes; old Script Extender: the menu is not looked for (no touches)."""
+    The game's pause menu or a message box (a confirmation) open (Ext.UI.Defer present): the window is closed under
+    it, the hotkey there does not open it, and it comes back when it closes; old Script Extender: the menu is not
+    looked for (no touches)."""
     patches = patches or {}
     fails = []
     r = gate(False, False, patches)
@@ -57,18 +89,19 @@ def gate_failures(patches=None):
     if r.labels == 0:
         fails.append("no Ext.UI.Defer, UnsafeUiOnOldSE = true: the highlighter never reached a menu label")
     ticks = r.ticks
-    r = gate(True, False, patches, menu=True)
-    if r.outside != 0:
-        fails.append(f"pause menu: {r.outside} UI tree touches outside the deferred callback (must be 0)")
-    if not r.openBefore:
-        fails.append("pause menu: the advisor window was not open before it (nothing checked)")
-    if not r.hiddenInMenu:
-        fails.append("pause menu open: the advisor window stays drawn over it")
-    if r.openAfterKeys:
-        fails.append("pause menu open: the hotkey opened the window over it")
-    if not r.reopened:
-        fails.append("pause menu closed: the advisor window did not come back")
-    r = gate(False, False, patches, menu=True)
+    for widget, what in MENU_WIDGETS:
+        r = gate(True, False, patches, menu=widget)
+        if r.outside != 0:
+            fails.append(f"{what}: {r.outside} UI tree touches outside the deferred callback (must be 0)")
+        if not r.openBefore:
+            fails.append(f"{what}: the advisor window was not open before it (nothing checked)")
+        if not r.hiddenInMenu:
+            fails.append(f"{what} open: the advisor window stays drawn over it")
+        if r.openAfterKeys:
+            fails.append(f"{what} open: the hotkey opened the window over it")
+        if not r.reopened:
+            fails.append(f"{what} closed: the advisor window did not come back")
+    r = gate(False, False, patches, menu="GameMenu")
     if r.touches != 0:
         fails.append(f"no Ext.UI.Defer, pause menu open: the UI tree was touched {r.touches} times (must be 0)")
     return fails, ticks
@@ -95,6 +128,15 @@ def description_failures(text):
     return fails
 
 
+# tools/mock_test.lua must report failures with these
+MOCK_MUTATIONS = [
+    ("Highlighter.lua: a long point-buy bracket keeps the full name (runs under the row's - button)",
+     {"Highlighter.lua": [("if #t > ABILITY_TEXT_MAX and ABILITY_KEY[name] then", "if false then")]}),
+    ("Highlighter.lua: a row under the game's short name is not found again (never updated or restored)",
+     {"Highlighter.lua": [("bare == BA.Norm(name) or bare == BA.Norm(ABILITY_KEY[name] or name)",
+                           "bare == BA.Norm(name)")]}),
+]
+
 DESCRIPTION_MUTATIONS = [
     ("meta.lsx Description over the Toolkit's 250 characters", lambda d: d + " " + "x" * META_DESCRIPTION_MAX),
     ("meta.lsx Description without the Script Extender line", lambda d: d.replace("Script Extender", "")),
@@ -109,6 +151,10 @@ MUTATIONS = [
      {"Main.lua": [("BA.HL.Run(function()", "pcall(function()")]}),
     ("Highlighter.lua: the pause menu widget is not recognised",
      {"Highlighter.lua": [("BA.HL.PAUSE_WIDGETS = { GameMenu = true,", "BA.HL.PAUSE_WIDGETS = { GameMenuX = true,")]}),
+    ("Highlighter.lua: the game's message box is not recognised",
+     {"Highlighter.lua": [("Dialog_box = true, MessageBox_c = true }", "MessageBox_c = true }")]}),
+    ("Highlighter.lua: the controller message box is not recognised",
+     {"Highlighter.lua": [("Dialog_box = true, MessageBox_c = true }", "Dialog_box = true }")]}),
     ("Main.lua: the pause menu read straight from the tick",
      {"Main.lua": [("BA.HL.Run(BA.HL.CheckMenu)", "pcall(BA.HL.CheckMenu)")]}),
     ("Window.lua: the window is not reopened after the pause menu",
@@ -126,19 +172,23 @@ def main():
             ok = bool(fails)
             bad += not ok
             print(f"[{'OK' if ok else 'BAD'}] {desc}\n      " + ("; ".join(fails[:2]) if fails else "still green"))
+        for desc, patches in MOCK_MUTATIONS:
+            n = mock_failures(patches)
+            bad += not n
+            print(f"[{'OK' if n else 'BAD'}] {desc}\n      " + (f"mock test: {n} failures" if n else "still green"))
         for desc, break_it in DESCRIPTION_MUTATIONS:
             fails = description_failures(break_it(meta_description()))
             ok = bool(fails)
             bad += not ok
             print(f"[{'OK' if ok else 'BAD'}] {desc}\n      " + ("; ".join(fails[:2]) if fails else "still green"))
-        total = len(MUTATIONS) + len(DESCRIPTION_MUTATIONS)
+        total = len(MUTATIONS) + len(MOCK_MUTATIONS) + len(DESCRIPTION_MUTATIONS)
         print(f"\n{total - bad}/{total} mutations went red")
         return 1 if bad or not MUTATIONS else 0
     failed = bool(mock_test())
     fails, ticks = gate_failures()
     for f in fails:
         print("FAIL: " + f)
-    print(f"UI-thread gate: 5 scenarios x {ticks} ticks, {len(fails)} failures")
+    print(f"UI-thread gate: {4 + len(MENU_WIDGETS)} scenarios x {ticks} ticks, {len(fails)} failures")
     desc = meta_description()
     desc_fails = description_failures(desc)
     for f in desc_fails:

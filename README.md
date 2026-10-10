@@ -9,7 +9,7 @@ Shows the strongest community build for your character and marks the right choic
 
 It works in two ways:
 
-1. **In the game menus:** every choice the build wants on the current screen gets a `* ` prefix (the game font draws it as a small star): race, subrace, class, subclass, background, deity, skills and expertise, feats and their own choices (for example Resilient: Constitution), spells and cantrips, spells to prepare, the spell to replace, fighting styles, manoeuvres, invocations, metamagic, Pact Boon, Draconic Ancestry, Favoured Enemy and Natural Explorer. Tiles (race, class, subclass, background, deity) and spell icons also get a rainbow outline. Point-buy rows and the ability rows of Ability Improvement show the target score in brackets, e.g. `Strength (17, +2)`.
+1. **In the game menus:** every choice the build wants on the current screen gets a `* ` prefix (the game font draws it as a small star): race, subrace, class, subclass, background, deity, skills and expertise, feats and their own choices (for example Resilient: Constitution), spells and cantrips, spells to prepare, the spell to replace, fighting styles, manoeuvres, invocations, metamagic, Pact Boon, Draconic Ancestry, Favoured Enemy and Natural Explorer. Tiles (race, class, subclass, background, deity) and spell icons also get a rainbow outline. Point-buy rows and the ability rows of Ability Improvement show the target score in brackets, e.g. `Strength (17, +2)`; a row too long for its name column uses the game's short name, e.g. `CON (16, +1)`.
 2. **Advisor window** (F7): shows the build, a "DO THIS NOW" list for the current level, `[OK]` / `[CHANGE]` checks for your current race, class and point-buy, and the full level 1-12 plan.
 
 ## Requirements
