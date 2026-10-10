@@ -3,6 +3,8 @@
 -- and spell icons, point-buy and ability-improvement targets, feat sub-choices, spell swaps, restore on close).
 local ROOT = ...
 local LUA = ROOT .. "/BuildAdvisor/Mods/BuildAdvisor/ScriptExtender/Lua/"
+-- Loot Advisor's mod Lua (the sibling checkout) for the gear test; tools/run_tests.py fills it in
+local LA_LUA = nil
 
 ------------------------------------------------------------------ mock static data
 local function ts(s) return { Get = function() return s end, Handle = { Handle = s } } end
@@ -627,6 +629,126 @@ expect(BA.UI.widthPx == 600, "text re-wraps to the player's width")
 entities.CCRespecDefinition = nil
 tick(); log = {}
 Ext.IMGUI.GetViewportSize = nil
+
+-- 17) Gear: Loot Advisor's sets for the selected build, one folded section per set with a list per act, a spoiler
+-- note above them and a line pointing to Loot Advisor; without Loot Advisor (or without sets) only that line
+local LA_UUID = "af37374f-f532-421a-b778-a24e17255c7e"
+local loaded = {}
+Ext.Mod = { IsModLoaded = function(u) return loaded[u] == true end }
+local function items(...)
+  local out = {}
+  for i, n in ipairs({ ... }) do out[i] = { slot = "S" .. i, slotName = "Slot " .. i, name = n, id = "ID_" .. n } end
+  return out
+end
+local calls = {}
+local stubSets = { char = "laezel", build = "x", sets = {
+  { { name = "Best overall", items = items("Sword", "Helm") }, { name = "Best overall", items = items("Axe") },
+    { name = "Giant Slayer", items = items("Club", "Cap", "Ring") } },
+  { nil, { name = "Crits", items = items("Pike") }, { name = "Crits", items = items("Maul") } },
+  { [3] = { name = "Tank", items = items("Shield") } } } }
+stubSets.sets[1][1].items[1].owned = true
+stubSets.sets[1][1].items[2].onlyOwned = true
+local function stubApi(result)
+  return { GearSets = function(ck, id, n) calls[#calls + 1] = { ck, id, n }; return result end }
+end
+
+expect(BA.Gear.Api() == nil, "Loot Advisor not loaded: no gear api")
+local g = BA.Gear.Outline(lz, lzEntry.build, nil)
+expect(#g.sets == 0 and g.header == nil and g.ref == "Install Loot Advisor for gear sets.",
+  "Loot Advisor missing: only the pointer line, no sections: " .. tostring(g.ref))
+loaded[LA_UUID] = true
+Mods = { LootAdvisor = { LA = {} } }
+expect(BA.Gear.Api() == nil, "a Loot Advisor without the api: no gear api")
+Mods.LootAdvisor.LA.Api = stubApi(stubSets)
+expect(BA.Gear.Api() == Mods.LootAdvisor.LA.Api, "Loot Advisor loaded: its api is used")
+loaded[LA_UUID] = nil
+expect(BA.Gear.Api() == nil, "Loot Advisor's table without the mod loaded: not used")
+loaded[LA_UUID] = true
+
+g = BA.Gear.Outline(lz, lzEntry.build, BA.Gear.Api())
+local last = calls[#calls]
+expect(last and last[1] == "laezel" and last[2] == lzEntry.build.id and last[3] == 3,
+  "sets asked for the origin and the selected build, three at most")
+expect(#g.sets == 3, "three gear sets: " .. #g.sets)
+local s1 = g.sets[1]
+expect(s1.title == "Gear set 1: Best overall / Giant Slayer", "set 1 title names its sets: " .. tostring(s1.title))
+expect(#s1.acts == 3 and s1.acts[1].title == "Act 1: Best overall" and s1.acts[3].title == "Act 3: Giant Slayer",
+  "set 1: a list per act, titled with the act and the set name")
+expect(s1.acts[1].items[1] == "Slot 1: Sword (you have it)", "owned item marked: " .. tostring(s1.acts[1].items[1]))
+expect(s1.acts[1].items[2] == "Slot 2: Helm (only if you already have it)",
+  "an earlier act's item marked only-if-owned: " .. tostring(s1.acts[1].items[2]))
+expect(#g.sets[2].acts == 2 and g.sets[2].acts[1].title == "Act 2: Crits", "an act without that set is left out")
+expect(#g.sets[3].acts == 1 and g.sets[3].acts[1].title == "Act 3: Tank", "set 3 with one act")
+expect(g.header == "Gear from Loot Advisor (spoilers: item names)", "spoiler note above the sets")
+expect(g.ref == "Where to find them and live tracking: Loot Advisor (F6) and its Sets page.", "pointer to Loot Advisor")
+Mods.LootAdvisor.LA.Api = stubApi(nil)
+g = BA.Gear.Outline(lz, lzEntry.build, BA.Gear.Api())
+expect(#g.sets == 0 and g.header == nil and g.ref:find("no gear sets for this build") ~= nil,
+  "no sets for the build: only the pointer line: " .. tostring(g.ref))
+
+-- the window: three collapsed sections in place of the old Gear part; without Loot Advisor only the pointer line
+local function headers()
+  local out = {}
+  for _, n in ipairs(BA.UI.content.children) do
+    if n.kind == "CollapsingHeader" then out[#out + 1] = n.Label end
+  end
+  return out
+end
+local function logged(s) for _, l in ipairs(log) do if l:find(s, 1, true) then return true end end return false end
+local lzAnalysis = BA.Analyse(lz, lzEntry.build)
+Mods.LootAdvisor.LA.Api = stubApi(stubSets)
+log = {}
+BA.UI.Render(lz, { lzEntry }, 1, lzAnalysis)
+local hs = headers()
+local gearHs = {}
+for _, h in ipairs(hs) do if h:find("^Gear set") then gearHs[#gearHs + 1] = h end end
+expect(#gearHs == 3, "window: three gear set sections: " .. table.concat(hs, " | "))
+expect(not logged("Gear & tips") and not logged("Key gear"), "window: the old Gear part is gone")
+expect(logged("SeparatorText: Gear from Loot Advisor (spoilers: item names)"), "window: spoiler note in the Gear header")
+expect(logged("Act 1: Best overall") and logged("Slot 1: Sword (you have it)"), "window: the act lists inside the sections")
+expect(logged("Where to find them and live tracking: Loot Advisor (F6)"), "window: pointer to Loot Advisor")
+loaded[LA_UUID] = nil
+log = {}
+BA.UI.Render(lz, { lzEntry }, 1, lzAnalysis)
+gearHs = {}
+for _, h in ipairs(headers()) do if h:find("^Gear set") then gearHs[#gearHs + 1] = h end end
+expect(#gearHs == 0 and not logged("spoilers: item names") and logged("Install Loot Advisor for gear sets."),
+  "window without Loot Advisor: the pointer line only")
+expect(logged("Respec any time at camp with Withers"), "window: the Withers tip moved to About this build")
+
+-- Loot Advisor's real data and api (the sibling checkout), as the game loads both mods
+if LA_LUA then
+  for _, f in ipairs({ "Shared/Common.lua", "Shared/LootData.lua", "Shared/ModData.lua", "Shared/Logic.lua",
+                       "Shared/Api.lua" }) do dofile(LA_LUA .. f) end
+  Mods.LootAdvisor.LA = LA
+  loaded[LA_UUID] = true
+  local ast = { mode = "Party", name = "Astarion", origin = "Astarion" }
+  g = BA.Gear.Outline(ast, BA.BuildById.thx, BA.Gear.Api())
+  local acts = g.sets[1] and #g.sets[1].acts or 0
+  expect(#g.sets >= 1 and acts == 3, "Loot Advisor data: Astarion's thx sets, set 1 with all three acts: " .. #g.sets)
+  local okLines = true
+  for _, set in ipairs(g.sets) do
+    for _, a in ipairs(set.acts) do
+      for _, l in ipairs(a.items) do if not l:find("^[%w ]+: %S") then okLines = false end end
+    end
+  end
+  expect(okLines, "Loot Advisor data: every line is 'slot: item'")
+  local tav = { mode = "Party", name = "Tav", origin = "Generic" }
+  g = BA.Gear.Outline(tav, BA.BuildById.sorcadin, BA.Gear.Api())
+  expect(#g.sets >= 1, "Loot Advisor data: a Tav on Sorcadin gets that build's sets")
+  local without
+  for _, b in ipairs(BA.Builds) do
+    if not LA.Api.GearSets(nil, b.id) then without = b end
+  end
+  if without then
+    g = BA.Gear.Outline(tav, without, BA.Gear.Api())
+    expect(#g.sets == 0 and g.ref == BA.Gear.REF_NO_SETS, "Loot Advisor data: " .. without.id .. " has no sets: pointer only")
+  end
+  print("Loot Advisor data checked: " .. LA_LUA)
+end
+loaded[LA_UUID] = nil
+Mods = nil
+log = {}
 
 -- 7) every build has 12 levels, valid abilities (27 point buy) and classes
 local cost = { [8] = 0, [9] = 1, [10] = 2, [11] = 3, [12] = 4, [13] = 5, [14] = 7, [15] = 9 }

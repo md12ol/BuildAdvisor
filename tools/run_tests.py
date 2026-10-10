@@ -22,11 +22,24 @@ def lua_file(name):
         return f.read()
 
 
+# Loot Advisor's mod Lua in the sibling checkout: the gear test reads its real sets through its api. CI always checks
+# the sibling out; a local run without it skips that part and says so.
+LA_LUA = os.path.join(os.path.dirname(root), "LootAdvisor", "LootAdvisor", "Mods", "LootAdvisor", "ScriptExtender",
+                      "Lua").replace("\\", "/")
+
+
 def mock_test(mod_root=None, quiet=False):
     lua = lupa.LuaRuntime()
     if quiet:
         lua.execute("print = function() end")
-    return lua.execute(lua_file("mock_test.lua").replace("local ROOT = ...", 'local ROOT = "%s"' % (mod_root or root)))
+    src = lua_file("mock_test.lua").replace("local ROOT = ...", 'local ROOT = "%s"' % (mod_root or root))
+    if os.path.isfile(os.path.join(LA_LUA, "Shared", "Api.lua")):
+        src = src.replace("local LA_LUA = nil", 'local LA_LUA = "%s/"' % LA_LUA)
+    elif os.environ.get("CI"):
+        raise SystemExit(f"Loot Advisor sibling checkout missing (with its Shared/Api.lua): {LA_LUA}")
+    elif not quiet:
+        print(f"note: no Loot Advisor sibling with Shared/Api.lua at {LA_LUA}; its real gear data is not checked")
+    return lua.execute(src)
 
 
 LUA_REL = ("BuildAdvisor", "Mods", "BuildAdvisor", "ScriptExtender", "Lua")
@@ -158,6 +171,20 @@ MOCK_MUTATIONS = [
      {"Window.lua": [("return { left, PANEL_TOP * s }", "return { left, 0 }")]}),
     ("Window.lua: the player's move is not noticed (window put back)",
      {"Window.lua": [("elseif p.seen then", "elseif false then")]}),
+    ("Gear.lua: Loot Advisor's sets read while the mod is not loaded",
+     {"Gear.lua": [("  if not try(function() return Ext.Mod.IsModLoaded(BA.Gear.LA_UUID) end) then return nil end",
+                    "")]}),
+    ("Gear.lua: the sets asked for without the character's origin",
+     {"Gear.lua": [("try(api.GearSets, BA.OriginKey(ctx), build.id, BA.Gear.SETS)",
+                    "try(api.GearSets, nil, build.id, BA.Gear.SETS)")]}),
+    ("Gear.lua: owned items not marked",
+     {"Gear.lua": [('if it.owned then s = s .. " (you have it)"', 'if false then s = s .. " (you have it)"')]}),
+    ("Gear.lua: no spoiler note above the sets",
+     {"Gear.lua": [("out.header = BA.Gear.SPOILER", "")]}),
+    ("Window.lua: the gear set sections not drawn",
+     {"Window.lua": [("for _, set in ipairs(gear.sets) do", "for _, set in ipairs({}) do")]}),
+    ("Window.lua: the line pointing to Loot Advisor not drawn",
+     {"Window.lua": [("text(c, gear.ref, GREY)", "")]}),
 ]
 
 DESCRIPTION_MUTATIONS = [

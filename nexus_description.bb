@@ -41,7 +41,7 @@ In the window: build picker, [i]Show all builds[/i], [i]Highlight in game menus[
 Disable or remove Build Advisor in the mod manager. Nothing is written to your saves.
 
 [size=4][b]Works with Loot Advisor[/b][/size]
-Installed together with [url=https://github.com/md12ol/LootAdvisor]Loot Advisor[/url], the items Loot Advisor recommends follow the build you picked here. Each mod also works on its own.
+Installed together with [url=https://github.com/md12ol/LootAdvisor]Loot Advisor[/url], the items Loot Advisor recommends follow the build you picked here, and the advisor window shows the build's three best gear sets from Loot Advisor, act by act (spoilers: item names). Loot Advisor is made for these builds: its sets are built for them, and any other character gets the closest build's recommendations. Each mod also works on its own.
 
 [size=4][b]Source and bug reports[/b][/size]
 [url=https://github.com/md12ol/BuildAdvisor]github.com/md12ol/BuildAdvisor[/url] (MIT licence). The pak contains outline textures recoloured from the game's own frame textures, under Larian's modding terms; the mod is free.
