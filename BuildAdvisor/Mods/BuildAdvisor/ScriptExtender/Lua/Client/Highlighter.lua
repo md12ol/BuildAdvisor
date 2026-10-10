@@ -218,7 +218,10 @@ local function outline(el, prop, brush, want, A)
       p = { prop = prop, orig = try(getProp, el, prop) }
       painted[k] = p
     end
-    if try(getProp, el, prop) ~= brush then pcall(setProp, el, prop, brush) end
+    -- An unset brush reads as nil, and comparing nil with a brush object raises an error in Script Extender, which
+    -- ended the whole pass before any star or outline was drawn.
+    local cur = try(getProp, el, prop)
+    if cur == nil or not try(function() return cur == brush end) then pcall(setProp, el, prop, brush) end
     return true
   elseif p then
     local back = p.orig
@@ -325,6 +328,9 @@ function BA.HL.Apply(wanted, abilityPlan, skillPlan, opts)
   -- Settings.Debug: write what the skill-summary / Change-button search saw to BuildAdvisor_debug.txt
   local debug = BA.Settings and BA.Settings.Debug
   local stack, summaryAnc, commaTexts, panelAnc = {}, nil, {}, nil
+  -- In the spell pickers the icon's "border" has no view model of its own: the spell sits on the ContentPresenter
+  -- two levels up (ls.VMSpellReference, field Spell), which the walk reaches just before the border.
+  local spellRef
 
   local function walk(el, depth, label, once)
     if budget <= 0 or depth > 80 then return end
@@ -337,6 +343,7 @@ function BA.HL.Apply(wanted, abilityPlan, skillPlan, opts)
       local dc = try(getDC, el)
       unreadableDC[key] = (dc == nil) or nil
       local dcType = dc and try(getType, dc)
+      if dcType == "ls.VMSpellReference" then spellRef = try(getField, dc, "Spell") end
       if hasWanted and dcType == "ls.VMCharacterCreationSkill" then
         -- skill picker row: Skill = "SleightOfHand"; its name TextBlock is bound
         local sk = try(getField, dc, "Skill")
@@ -367,7 +374,9 @@ function BA.HL.Apply(wanted, abilityPlan, skillPlan, opts)
 
     -- spell / cantrip icon: the 4-pixel Border around the icon carries the spell's view model
     if ty == "Border" and try(getName, el) == "border" then
-      local want = hasWanted and vmLabel(try(getDC, el), wanted) ~= nil
+      local dc = try(getDC, el) or spellRef
+      spellRef = nil
+      local want = hasWanted and vmLabel(dc, wanted) ~= nil
       if outline(el, "BorderBrush", A.icon, want, A) then outlines = outlines + 1 end
     end
 
