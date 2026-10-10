@@ -29,6 +29,15 @@ DESKTOP = os.path.dirname(BA)                   # the folder with the side-by-si
 SRC = os.path.join(HERE, "mods_docs.html")
 LEAK_SCAN = os.path.join(DESKTOP, "LootAdvisor", "tools")
 
+# shown at the top of the Loot Advisor handbook (the same sentence as its README, INSTALL.md, Nexus page, Sets page and
+# the one-time notice in its F6 window; Loot Advisor's tests check every copy)
+SPOILER_LA = ("Loot Advisor names items, where they are and who carries them, and its notes reveal story outcomes "
+              "(who can die, which side you take, endings).")
+SPOILER_NOTE = """
+      <div class="note warn">
+        <p><b>Spoiler warning:</b> %s</p>
+      </div>"""
+
 MODS = {
     "BuildAdvisor": {"name": "Build Advisor", "chapter": "buildadvisor", "key": "F7", "other": "Loot Advisor",
                      "other_repo": "https://github.com/md12ol/LootAdvisor", "repo": "https://github.com/md12ol/BuildAdvisor",
@@ -41,7 +50,8 @@ MODS = {
                     "tagline": "The right gear for your build, and where to find it: rainbow frames, rainbow map "
                                "markers, an item list and a live Sets page in your browser.",
                     "facts": [("Hotkey", "<kbd>F6</kbd> item list"), ("For", "the 7 origin characters"),
-                              ("Needs", "Script Extender v33 or newer for frames and map painting")]},
+                              ("Needs", "Script Extender v33 or newer for frames and map painting")],
+                    "spoiler": SPOILER_LA},
 }
 
 SE_URL = "https://github.com/Norbyte/bg3se"
@@ -297,7 +307,7 @@ def build(mod, src, media_dir=None):
           <h2><span class="glyph %(glyph)s" aria-hidden="true"></span>%(name)s</h2>
           <dl>%(facts)s</dl>
         </a>
-      </div>
+      </div>%(spoiler)s
       <div class="note">
         <p><b>New here?</b> Read <a href="#before">Before you start</a> to install Script Extender and the mod, then <a href="#%(cid)s">%(name)s</a> for what you see in the game. The mod is free; source and updates: <a href="%(repo)s">%(repo)s</a>.</p>
       </div>
@@ -316,7 +326,8 @@ def build(mod, src, media_dir=None):
 </html>
 """ % {"name": d["name"], "style": style, "snav": snav, "nav": nav, "mnav": mnav, "cid": d["chapter"],
        "glyph": glyph, "tagline": d["tagline"], "facts": facts, "repo": d["repo"], "shared": shared, "sec": sec,
-       "script": script}
+       "script": script,
+       "spoiler": (SPOILER_NOTE % d["spoiler"] if d.get("spoiler") else "")}
     for k in FIGURES:
         if mod == "LootAdvisor" and k not in seen:
             misses.append("figure rule not used: %s" % k)
