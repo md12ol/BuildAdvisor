@@ -392,6 +392,124 @@ expect(wb.props.BorderBrush == CLEAR and lb.props.BorderBrush == CLEAR, "outline
 BA.Settings.Highlight = true
 entities.CCLevelUpDefinition = nil
 
+-- 12b) Spell icons as the game builds them (CCLib SpellIconTemplate): the Border "border" reads no DataContext;
+-- the spell is on the list item's ContentPresenter (ls.VMSpellReference, Spell) and on the elements inside the
+-- icon. The view model names the spell by a loca handle (with or without ";1") or by a stats id.
+do -- its own scope: the main chunk is near Lua's 200 locals
+local LOCA = { hb1e55000g0001g = "Bless", hc0e00000g0002g = "Healing Word", hc0e00000g0003g = "Cure Wounds",
+               hc0e00000g0004g = "Command", hc0e00000g0005g = "Command: Halt", hc0e00000g0006g = "Counterspell",
+               hc0e00000g0007g = "Shield of Faith", hc0e00000g0008g = "Witch Bolt" }
+local STATS = {
+  Target_Bless = { DisplayName = "hb1e55000g0001g;1" },
+  Target_Bless_2_AI = { DisplayName = "hb1e55000g0001g;1" },
+  Target_CureWounds = { DisplayName = "hc0e00000g0003g;1" },
+  Target_Command_Container = { DisplayName = "hc0e00000g0004g;1" },
+  Target_Command_Halt = { DisplayName = "hc0e00000g0005g;2", SpellContainerID = "Target_Command_Container" },
+  Target_ShieldOfFaith = { DisplayName = "hc0e00000g0007g;1" },
+}
+local locaBefore = Ext.Loca.GetTranslatedString
+Ext.Loca.GetTranslatedString = function(h) return LOCA[h] or h end -- like the game: an unknown handle comes back as is
+Ext.Stats = { Get = function(id) return STATS[id] end }
+
+local function spellVM(fields) fields.Type = "ls.VMCharacterCreationSpell"; return fields end
+local function typed(ty, name, kids, dc) local e = pel(ty, name, kids); e.DataContext = dc; return e end
+-- SpellIconTemplate; innerDC = what the level TextBlock inside the icon reads (nil: nothing inside reads)
+local function iconOf(innerDC)
+  return pel("Border", "border", { typed("Grid", "base", { pel("Rectangle"), typed("Grid", "hover"),
+    typed("TextBlock", "LevelText", nil, innerDC) }) }, { BorderBrush = CLEAR })
+end
+local function refOf(vm) return { Type = "ls.VMSpellReference", Spell = vm } end
+-- one item of a spell list: availableSpellTemplate (the list to pick from) or selectedSpellTemplate (the picked
+-- / prepared row: slot and cross images before the icon, remover / selector images after it)
+local function spellItem(vm, selectedRow, innerDC)
+  local icon = iconOf(innerDC)
+  local inner = typed("ContentPresenter", nil, { typed("Control", nil, { icon }, vm) }, refOf(vm))
+  local cc = typed("ContentControl", "icon", { inner })
+  local grid = selectedRow
+    and typed("Grid", nil, { typed("Image", "slot"), typed("Image", "cross"), cc, typed("Image", "remover"),
+                             typed("Image", "selected"), typed("Border", "empty") })
+    or typed("Grid", nil, { cc, typed("Image", "selected") })
+  return typed("ContentPresenter", nil, { typed("ls.LSButton", nil, { grid }) }, refOf(vm)), icon
+end
+local function spellList(items) return typed("ItemsControl", nil, { typed("ItemsPresenter", nil, { typed("WrapPanel", nil, items) }) }) end
+local ringed = function(icon) return icon.props.BorderBrush == ICON end
+
+-- Prepare Spells, Shadowheart's respec as a Light Cleric at level 1 (Bless, Healing Word, Guiding Bolt and Shield
+-- of Faith planned): the Prepared row and the Known Spells list
+local blessHandle = spellVM({ Name = "hb1e55000g0001g;1" })
+local hwVM = spellVM({ Name = "hc0e00000g0002g" })
+local pBless, pBlessIcon = spellItem(blessHandle, true)
+local pHw, pHwIcon = spellItem(hwVM, true)
+local pEmpty, pEmptyIcon = spellItem(nil, true)
+local kBless, kBlessIcon = spellItem(spellVM({ IDString = "Target_Bless" }), false)
+local kCure, kCureIcon = spellItem(spellVM({ IDString = "Target_CureWounds" }), false)
+local kHw, kHwIcon = spellItem(hwVM, false)
+local kSof, kSofIcon = spellItem(spellVM({ IDString = "Target_ShieldOfFaith" }), false)
+local kGb, kGbIcon = spellItem(spellVM({ IDString = "Projectile_GuidingBolt" }), false) -- no stats entry: the id's own name
+local kCmd, kCmdIcon = spellItem(spellVM({ IDString = "Target_Command_Container" }), false)
+setRoot({ assets, spellList({ pBless, pHw, pEmpty }), spellList({ kSof, kBless, kCure, kHw, kCmd, kGb }) })
+BA.Settings.Choices[BA.Norm("ShadowHeart") .. "|" .. BA.Norm("Shadowheart")] = "lightcleric"
+entities.CCRespecDefinition = { { CCRespecDefinition = { Definition = {
+  Name = "Shadowheart", Abilities = { 0, 0, 6, 7, 0, 9, 2 },
+  Definition = { Race = "helf", Subrace = "", Origin = "sh" },
+  LevelUpData = { Class = "clr", SubClass = "", Upgrades = { AbilityBonuses = {} } } } } } }
+tick(); dump("Respec Shadowheart: Prepare Spells")
+expect(BA.Current.build.id == "lightcleric" and BA.Current.analysis.highlight[BA.Norm("Bless")], "Light Cleric level 1 plans Bless")
+expect(ringed(pBlessIcon), "Prepared row: Bless (loca handle with ;1) ringed")
+expect(ringed(pHwIcon), "Prepared row: Healing Word ringed")
+expect(not ringed(pEmptyIcon), "Prepared row: empty slot not ringed")
+expect(ringed(kBlessIcon), "Known list: Bless (stats id) ringed")
+expect(ringed(kHwIcon) and ringed(kSofIcon), "Known list: Healing Word and Shield of Faith ringed")
+expect(ringed(kGbIcon), "Known list: Guiding Bolt ringed from its id when the stats cannot be read")
+expect(not ringed(kCureIcon) and not ringed(kCmdIcon), "Known list: Cure Wounds and Command not ringed")
+
+-- the extender reads no ContentPresenter (types it cannot read): the elements inside the icon still name the spell
+local bareItem, bareIcon = spellItem(nil, false, blessHandle)
+local bareCure, bareCureIcon = spellItem(nil, false, spellVM({ IDString = "Target_CureWounds" }))
+for _, it in ipairs({ bareItem, bareCure }) do -- no DataContext reads on either ContentPresenter
+  it.DataContext = nil; it.kids[1].kids[1].kids[1].kids[1].DataContext = nil
+end
+setRoot({ assets, spellList({ bareItem, bareCure }) })
+tick()
+expect(ringed(bareIcon) and not ringed(bareCureIcon), "icon read from inside when the list item reads nothing")
+
+-- spell replacement slots and the class summary's preparable spells: an icon in a bare Control, no list item.
+-- A list item before it without an icon of its own must not lend it its spell.
+local lonely = typed("ContentPresenter", nil, { typed("TextBlock") }, refOf(hwVM))
+local slotIcon = iconOf(nil)
+local slot = typed("Control", nil, { slotIcon }, spellVM({ IDString = "Target_CureWounds" }))
+local slotIcon2 = iconOf(spellVM({ Name = "hc0e00000g0007g" }))
+setRoot({ assets, lonely, slot, typed("Control", nil, { slotIcon2 }) })
+tick()
+expect(not ringed(slotIcon), "an icon without its own spell does not take the previous list item's spell")
+expect(ringed(slotIcon2), "replacement / summary slot icon ringed from the elements inside it")
+
+-- a list rebuilt after a pick: the new item can sit at the address of an element read empty before
+local function at(addr, e) return setmetatable(e, { __tostring = function() return addr end }) end
+local oldCP = at("cp@1", typed("ContentPresenter", nil, { typed("TextBlock") }, nil))
+setRoot({ assets, oldCP })
+tick()
+local reIcon = iconOf(nil)
+local newCP = at("cp@1", typed("ContentPresenter", nil, { typed("ls.LSButton", nil, { reIcon }) }, refOf(blessHandle)))
+setRoot({ assets, newCP })
+tick()
+expect(ringed(reIcon), "a rebuilt list item at a reused address is read on the next pass")
+
+-- spell names: upcast and AI variants, container variants, handles with and without the version
+local names = BA.HL.SpellNames
+expect(names(spellVM({ IDString = "Target_Bless_2_AI" })).bless, "upcast variant id names its spell")
+expect(names(spellVM({ IDString = "Target_Command_Halt" })).command, "container variant names its container")
+expect(names(spellVM({ Name = "hb1e55000g0001g;1" })).bless and names(spellVM({ Name = "hb1e55000g0001g" })).bless,
+  "loca handle read with and without its version")
+expect(names(spellVM({ IDString = "Shout_Unknown_Thing" })).unknownthing == nil, "a variant id without stats names nothing")
+entities.CCRespecDefinition = nil
+BA.Settings.Choices[BA.Norm("ShadowHeart") .. "|" .. BA.Norm("Shadowheart")] = nil
+tick()
+expect(not ringed(reIcon), "ring removed when the screen closes")
+Ext.Stats = nil
+Ext.Loca.GetTranslatedString = locaBefore
+end
+
 -- 13) Origins and the Dark Urge list
 local function firstBuilds(origin, cls)
   local ctx = { mode = "Character Creation", origin = origin, classes = {}, pendingClass = cls and { name = cls } or nil }

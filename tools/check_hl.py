@@ -16,6 +16,10 @@
    no ability above 20.
 3. COVERAGE (warning, listed): a spell or passive selector that gets fewer stars than the number of picks it asks
    for - the plan is incomplete there.
+4. SPELL ICONS (hard): the menus' spell icons name their spell by a loca handle or a stats id. The mod's own
+   resolver (Highlighter.lua BA.HL.SpellNames), run on the game's stats and loca, must give every spell of every
+   spell list that the plans name its planned label from both (so the icon gets its ring), and must never give a
+   spell another planned spell's label (a ring on the wrong icon).
 """
 import os
 import re
@@ -28,7 +32,8 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import gamedata_ui  # noqa: E402
 
-BUILDS = os.path.join(ROOT, "BuildAdvisor", "Mods", "BuildAdvisor", "ScriptExtender", "Lua", "Shared", "Builds.lua")
+LUA = os.path.join(ROOT, "BuildAdvisor", "Mods", "BuildAdvisor", "ScriptExtender", "Lua")
+BUILDS = os.path.join(LUA, "Shared", "Builds.lua")
 AB = {"STR": "Strength", "DEX": "Dexterity", "CON": "Constitution", "INT": "Intelligence", "WIS": "Wisdom",
       "CHA": "Charisma"}
 PREPARERS = {"Cleric", "Druid", "Paladin"}
@@ -49,6 +54,58 @@ def load_builds():
         lua.execute(f.read())
     ba = lua.globals().BA
     return lua_to_py(ba.Builds), lua_to_py(ba.Origins)
+
+
+def spell_icon_errors(gd, planned):
+    """section 4: [error] for the spell ids of every spell list whose icon would not match the plan's label."""
+    lua = lupa.LuaRuntime(unpack_returned_tuples=True, encoding=None)  # bytes both ways: loca text is UTF-8
+
+    def b(text):
+        return text.encode("utf-8") if isinstance(text, str) else text
+
+    stats = {}
+
+    def stat(sid):
+        sid = sid.decode("utf-8")
+        if sid not in gd.stats:
+            return None
+        if sid not in stats:
+            a = gd.stats[sid]
+            stats[sid] = lua.table_from({b(k): b(a[k]) for k in ("DisplayName", "SpellContainerID") if a.get(k)})
+        return stats[sid]
+
+    def loca(h):
+        t = gd.loca.get(h.decode("utf-8"))
+        return b(t) if isinstance(t, str) else h  # the game returns an unknown handle unchanged
+    lua.globals()[b"Ext"] = lua.table_from({b"Stats": lua.table_from({b"Get": stat}),
+                                            b"Loca": lua.table_from({b"GetTranslatedString": loca})})
+    for rel in (("Client", "Detect.lua"), ("Client", "Highlighter.lua")):
+        with open(os.path.join(LUA, *rel), "rb") as f:
+            lua.execute(f.read())
+    names_of = lua.eval(b"function(k, v) return BA.HL.SpellNames({ Type = 'ls.VMCharacterCreationSpell', [k] = v }) end")
+    lua_norm = lua.eval(b"BA.Norm")
+
+    def norm(text):
+        return lua_norm(b(text or ""))
+    want = {norm(x): x for x in planned}
+    errors = []
+    ids = sorted({sid for lst in gd.spell_lists.values() for sid in lst})
+    for sid in ids:
+        label = gd.stat_name(sid)
+        own = norm(label) if label else None
+        container = gd.stats.get(sid, {}).get("SpellContainerID")
+        allowed = {own, norm(gd.stat_name(container))} if container else {own}
+        handle = gd.stats.get(sid, {}).get("DisplayName") or ""
+        for how, value in (("stats id", sid), ("loca handle", handle), ("bare loca handle", handle.split(";")[0])):
+            got = set(names_of(b"IDString" if how == "stats id" else b"Name", b(value)).keys())
+            if own in want and own not in got:
+                errors.append("%s (%s): icon named by its %s does not resolve to %r (got %s)"
+                              % (sid, label, how, want[own], sorted(x.decode("utf-8", "replace") for x in got)))
+            for n in got - allowed:
+                if n in want:
+                    errors.append("%s (%s): icon named by its %s also resolves to the planned %r"
+                                  % (sid, label, how, want[n]))
+    return errors, len(ids)
 
 
 def parse_selectors(sel):
@@ -323,6 +380,17 @@ def main(argv):
             if bid not in {b["id"] for b in builds}:
                 errors.append("origin %s -> unknown build %s" % (o, bid))
 
+    planned = set()
+    for b in builds:
+        for s in b.get("raceHl") or []:
+            planned.add(s)
+        for lv in b["levels"]:
+            planned.update(lv.get("hl") or [])
+            if lv.get("swap"):
+                planned.update((lv["swap"].get("out"), lv["swap"].get("into")))
+    planned = {s for s in planned if "spell" in labels.get(s, ())}
+    icon_errors, icon_ids = spell_icon_errors(gd, planned)
+
     print("Build Advisor highlight check: %d builds, %d labels checked against %d game labels" %
           (len(builds), total, len(labels)))
     print("\nUNKNOWN LABELS: %d" % len(unknown))
@@ -334,7 +402,11 @@ def main(argv):
     print("\nCOVERAGE WARNINGS: %d" % len(warnings))
     for w in warnings:
         print("  " + w)
-    return 1 if unknown or errors else 0
+    print("\nSPELL ICONS: %d planned spells, %d spell ids of the spell lists, %d errors"
+          % (len(planned), icon_ids, len(icon_errors)))
+    for e in icon_errors:
+        print("  " + e)
+    return 1 if unknown or errors or icon_errors else 0
 
 
 if __name__ == "__main__":
