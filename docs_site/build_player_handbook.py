@@ -91,7 +91,6 @@ RULES = [
 FIGURES = {
     "Enlarge: item frames": {"cover": [(0, 0, 1000, 62), (0, 283, 1000, 311)]},      # internal labels in the image
     "Enlarge: map markers compared": {"cover": [(0, 0, 1100, 33)]},                   # old internal mod name
-    "Enlarge: not covered message": {"drop": True},                                   # old mod name, a hireling name
     "Enlarge: legend": {"drop": True, "keep_caption": True},                          # old shot shows a save's name
     "Enlarge: Sets page": {"drop": True},                                             # save's name; page redesigned
 }
