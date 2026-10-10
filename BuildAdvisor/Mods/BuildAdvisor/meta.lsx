@@ -8,7 +8,7 @@
         <node id="ModuleInfo">
           <attribute id="Author" type="LSString" value="Michael Dubé"/>
           <attribute id="CharacterCreationLevelName" type="FixedString" value=""/>
-          <attribute id="Description" type="LSString" value="Highlights the best-build choices during character creation, Withers respec and level up (requires Script Extender)."/>
+          <attribute id="Description" type="LSString" value="Build Advisor: marks the strongest community build's choices in character creation, Withers respec and every level-up, with an F7 window showing the full level 1-12 plan. Requires Script Extender (PC)."/>
           <attribute id="Folder" type="LSString" value="BuildAdvisor"/>
           <attribute id="LobbyLevelName" type="FixedString" value=""/>
           <attribute id="MD5" type="LSString" value=""/>

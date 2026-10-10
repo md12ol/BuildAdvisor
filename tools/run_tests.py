@@ -1,9 +1,13 @@
 """Runs the offline tests with an embedded Lua (pip install lupa).
 
-  python tools/run_tests.py            tools/mock_test.lua, then the UI-thread gate (tools/ui_gate_test.lua)
-  python tools/run_tests.py --mutate   the gate with its guard removed (patched in memory): must go red
+  python tools/run_tests.py            tools/mock_test.lua, the UI-thread gate (tools/ui_gate_test.lua) and the
+                                       meta.lsx Description check
+  python tools/run_tests.py --mutate   the gate with its guard removed and broken descriptions (patched in memory):
+                                       must go red
 """
+import html
 import os
+import re
 import sys
 
 import lupa
@@ -53,6 +57,32 @@ def gate_failures(patches=None):
     return fails, r.ticks
 
 
+META_DESCRIPTION_MAX = 250   # Larian's Toolkit (mod.io publishing) caps the mod description at 250 characters
+
+
+def meta_description():
+    with open(os.path.join(root, "BuildAdvisor", "Mods", "BuildAdvisor", "meta.lsx"), encoding="utf-8") as f:
+        m = re.search(r'id="Description" type="LSString" value="([^"]*)"', f.read())
+    return html.unescape(m.group(1)) if m else ""
+
+
+def description_failures(text):
+    """meta.lsx Description fits the Toolkit's 250 characters and names Script Extender."""
+    fails = []
+    if not text:
+        fails.append("meta.lsx has no Description")
+    if len(text) > META_DESCRIPTION_MAX:
+        fails.append(f"meta.lsx Description is {len(text)} characters (the Toolkit keeps {META_DESCRIPTION_MAX})")
+    if "Script Extender" not in text:
+        fails.append("meta.lsx Description does not say it needs Script Extender")
+    return fails
+
+
+DESCRIPTION_MUTATIONS = [
+    ("meta.lsx Description over the Toolkit's 250 characters", lambda d: d + " " + "x" * META_DESCRIPTION_MAX),
+    ("meta.lsx Description without the Script Extender line", lambda d: d.replace("Script Extender", "")),
+]
+
 MUTATIONS = [
     ("Highlighter.lua BA.HL.Run: no Ext.UI.Defer -> runs the UI code anyway (gate removed)",
      {"Highlighter.lua": [("if BA.Settings and BA.Settings.UnsafeUiOnOldSE == true then", "if true then")]}),
@@ -71,14 +101,25 @@ def main():
             ok = bool(fails)
             bad += not ok
             print(f"[{'OK' if ok else 'BAD'}] {desc}\n      " + ("; ".join(fails[:2]) if fails else "still green"))
-        print(f"\n{len(MUTATIONS) - bad}/{len(MUTATIONS)} mutations went red")
+        for desc, break_it in DESCRIPTION_MUTATIONS:
+            fails = description_failures(break_it(meta_description()))
+            ok = bool(fails)
+            bad += not ok
+            print(f"[{'OK' if ok else 'BAD'}] {desc}\n      " + ("; ".join(fails[:2]) if fails else "still green"))
+        total = len(MUTATIONS) + len(DESCRIPTION_MUTATIONS)
+        print(f"\n{total - bad}/{total} mutations went red")
         return 1 if bad or not MUTATIONS else 0
     failed = bool(mock_test())
     fails, ticks = gate_failures()
     for f in fails:
         print("FAIL: " + f)
     print(f"UI-thread gate: 3 scenarios x {ticks} ticks, {len(fails)} failures")
-    return 1 if failed or fails or ticks == 0 else 0
+    desc = meta_description()
+    desc_fails = description_failures(desc)
+    for f in desc_fails:
+        print("FAIL: " + f)
+    print(f"meta.lsx Description: {len(desc)} characters, {len(desc_fails)} failures")
+    return 1 if failed or fails or desc_fails or ticks == 0 else 0
 
 
 if __name__ == "__main__":
