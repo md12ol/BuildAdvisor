@@ -55,7 +55,9 @@ Console commands (Script Extender console): `!ba_toggle`, `!ba_dump` (prints wha
 | Circle of the Moon Druid 12 | A | Druid | Halsin |
 | Circle of the Stars Druid 12 | A | Druid | Jaheira |
 
-To edit or add builds, change `BuildAdvisor/Mods/BuildAdvisor/ScriptExtender/Lua/Shared/Builds.lua`. Each level's `hl` list holds the exact English menu labels to star (`asi` the ability raises, `swap` a spell to replace). Check every label and level against the game's own data, then rebuild:
+To edit or add builds, change `BuildAdvisor/Mods/BuildAdvisor/ScriptExtender/Lua/Shared/Builds.lua`. Each level's `hl` list holds the exact English menu labels to star (`asi` the ability raises, `swap` a spell to replace). Check every label and level against the game's own data, then rebuild. `check_hl.py` reads the game's paks and the
+English localisation and stats that the sibling `../LootAdvisor` extracts, so run Loot Advisor's Rebuild (at least
+`build_cache.py` and `stats.py`) first; a new build also needs a profile in `../LootAdvisor/tools/build_profiles.py`:
 
 ```bash
 python tools/check_hl.py        # 0 unknown labels, 0 plan errors
@@ -87,7 +89,8 @@ curl -L --create-dirs -o .ide/ExtIdeHelpers.lua https://raw.githubusercontent.co
 The outline textures are built with `python ../LootAdvisor/tools/make_la_gui.py BuildAdvisor/Mods/BuildAdvisor/GUI --set build` (sibling LootAdvisor repository; recoloured from the game's own frame textures, shipped under Larian's modding terms).
 
 ## Tests
-`python tools/run_tests.py` (needs `pip install lupa`) runs the mod against a mocked Script Extender. The mock covers character creation, level-up, respec, origin, party view, the highlighter (stars, outlines, point-buy and ability-improvement targets, feat choices, spell swaps, restoring) and the hotkey.
+`python tools/run_tests.py` (needs `pip install lupa`) runs the mod against a mocked Script Extender (`tools/mock_test.lua`,
+`tools/ui_gate_test.lua`; add a scenario there for new behaviour). The mock covers character creation, level-up, respec, origin, party view, the highlighter (stars, outlines, point-buy and ability-improvement targets, feat choices, spell swaps, restoring) and the hotkey.
 
 ## Releases
 Versions are SemVer tags `vX.Y.Z`; the first release is `v0.9.0` (set by `release-as` in
