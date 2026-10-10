@@ -381,9 +381,9 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
           <tr><td class="nw">Build header</td><td>The build name, then <span class="gchip c-gold">Tier – role</span>, then one grey line on why it was suggested (best for this origin, starts as your class, uses your class, or matches your classes) with the origin's advice.</td></tr>
           <tr><td class="nw"><span class="gchip c-gold">Do this now</span></td><td>What to pick on this screen. In creation and respec: race (best first and the alternatives; an origin's locked race in one short line), class with its choices, background, abilities with the +2 / +1 split, skills and, for clerics, the deity. In level-up: "Level N: class" and its choices. In the party view this heading reads <b>Next level-up</b>.</td></tr>
           <tr><td class="nw">Your choices</td><td>One <span class="gchip c-green">green</span> line names what already matches the plan (race, class, abilities). Each choice to change gets its own row with what to pick instead: <span class="gchip c-red">red</span> for race or class, amber for an ability score or class levels that differ from the plan (keep following the plan, or respec with Withers for 100 gold).</td></tr>
-          <tr><td class="nw">About this build</td><td>Folded: why the build is strong, the race reasons and the build's tips.</td></tr>
+          <tr><td class="nw">About this build</td><td>Folded: why the build is strong, the race reasons, the build's tips and a reminder about Withers.</td></tr>
           <tr><td class="nw">Full level 1–12 plan</td><td>Folded table: level, class, choices. The current level is gold, past levels are grey.</td></tr>
-          <tr><td class="nw">Gear &amp; tips</td><td>The build's key items and a reminder about Withers.</td></tr>
+          <tr><td class="nw">Gear set 1–3</td><td>With Loot Advisor installed: a spoiler note, then three folded sections, Loot Advisor's sets 1 to 3 for the selected build. Each holds one list per act (slot: item); "you have it" marks an item the party owns, "only if you already have it" an item that can no longer be found in that act. A grey line below points to Loot Advisor's <kbd>F6</kbd> list and Sets page for where to find them. Without Loot Advisor, or for a build it has no sets for, only that line shows. The sets are read from Loot Advisor while the game runs; Build Advisor ships no item data.</td></tr>
         </tbody>
       </table></div>
       <p class="prose"><b>Colours:</b> <span class="gchip c-green">green</span> already matches, <span class="gchip c-red">red</span> or amber change this, <span class="gchip c-gold">gold</span> headings and the current level, <span class="gchip c-grey">grey</span> notes and past levels.</p>
@@ -491,6 +491,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
 
       <h3 id="ba-status">Current status</h3>
       <ul class="log">
+        <li><time>2026-10-10</time><span><b>Gear sets from Loot Advisor</b> <span class="pill unv">not yet checked in game</span> the window&#39;s Gear part is now three folded sections, Loot Advisor&#39;s sets 1 to 3 for the selected build with a list per act, read from Loot Advisor while the game runs; without it one line points to it.</span></li>
         <li><time>2026-10-10</time><span>The menu marks now go through Script Extender v33's safe interface call, which removes a rare crash while menus are rebuilt; on older Script Extender only the window is shown.</span></li>
         <li><time>2026-10-09</time><span>Shadowheart's first build is now Light Domain Cleric 9 / Sorcerer 3 (Quickened Spell): checked in game, Radiance of the Dawn scales with her total level, so the Sorcerer levels cost it nothing. Light Domain Cleric 12 is her second.</span></li>
         <li><time>2026-10-09</time><span><b>22 builds and a mark on every choice</b> <span class="pill unv">not yet checked in game</span> New first builds for Gale (Evocation Wizard 10 / Tempest Cleric 2) and Lae'zel (Battle Master with Giantslayer and an advantage source); third builds for Karlach (Berserker 7 / Thief 3 / Fighter 2) and Wyll (Hexblade Sorlock); a second build for Shadowheart (Light Cleric 9 / Sorcerer 3); a fixed list for the Dark Urge. Stars on background, deity and feat choices; rainbow outlines on tiles and spell icons; targets on level-up ability rows. Labels now match the game's exact wording ("Agonising Blast", "Giant", "Evocation"), and several level plans were corrected (spells per level, metamagic levels, free oath spells).</span></li>
@@ -636,7 +637,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
 
       <h4>Header</h4>
       <div class="prose">
-        <p>Line 1 (gold): character, act and the build Loot Advisor matched to the character. Line 2 (grey): the region, the number of items and markers, and the hotkey. Hover line 2 for why that build was picked (for example "closest to your class levels" or "closest to your classes; Build Advisor&#39;s order").</p>
+        <p>Line 1 (gold): character, act and the build Loot Advisor matched to the character. Line 2 (grey): the region, the number of items and markers, and the hotkey. Hover line 2 for why that build was picked (for example "closest to your class levels" or "closest to your classes; Build Advisor&#39;s order"). For a character on none of the builds an amber line 3 names the closest build, how alike it is and whose sets it uses, for example "Closest build: Path of Giants Barbarian 12 (64% alike; Karlach&#39;s sets)".</p>
         <p><b>Open Sets page</b> sits above the header. The game cannot open a browser or write to the clipboard, so the button shows the page's path in a field instead: click the field (it selects the whole path), press <kbd>Ctrl</kbd>+<kbd>C</kbd>, then paste it into your browser's address bar, or press <kbd>Win</kbd>+<kbd>R</kbd>, <kbd>Ctrl</kbd>+<kbd>V</kbd>, <kbd>Enter</kbd>. The same button hides the path again.</p>
       </div>
       <figure class="shot">
@@ -644,7 +645,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
         <figcaption>The Sets page path, selected and ready for <kbd>Ctrl</kbd>+<kbd>C</kbd>.</figcaption>
       </figure>
       <div class="prose">
-        <p>Halsin, Jaheira, Minsc, Minthara, Tavs and hirelings get the closest origin build by their class levels (or, with no class in common, a build for their highest ability); the header names the build used.</p>
+        <p><b>Made for Build Advisor&#39;s builds.</b> Loot Advisor&#39;s sets are made for the builds of Build Advisor. Any other character (Halsin, Jaheira, Minsc, Minthara, a custom Tav, a hireling, or an origin respecced into a class mix none of its builds has) gets the closest Build Advisor build: most alike in class levels, then subclass, main ability, caster type and weapon style; equal ones go to the build you picked in Build Advisor, then to the one with fewer classes. The header names that build and how alike it is, and the item tooltips read "Best &lt;slot&gt; for &lt;name&gt; (closest build)".</p>
       </div>
 
       <h4>Legend</h4>
@@ -805,7 +806,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
 
       <h3 id="la-limits">Known limitations</h3>
       <ul class="prose">
-        <li><b>Scored builds are the origins' builds.</b> Halsin, Jaheira, Minsc, Minthara, hirelings and custom characters borrow the closest origin build.</li>
+        <li><b>Scored builds are Build Advisor&#39;s builds for the origins.</b> Halsin, Jaheira, Minsc, Minthara, hirelings, custom characters and respecced origins get the closest of those builds, named in the <kbd>F6</kbd> header.</li>
         <li><b>Frames and tooltips follow the selected character.</b> Map markers cover everyone (see the filter in the <kbd>F6</kbd> list).</li>
         <li>Some items have no fixed spot (quest rewards, boss drops, forge results) and appear in the list only. A few traders are marked on the trader in person; the game draws those only when you are near them.</li>
         <li>Areas are recognised from where things are placed in the level. Rarely, an interior is not recognised and the marker stays on the item itself, which then shows as an edge arrow.</li>
@@ -833,6 +834,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
       <h3 id="la-status">Current status</h3>
       <p class="prose"><span class="pill ok">working in game</span> <span class="pill plan">not released yet</span></p>
       <ul class="log">
+        <li><time>2026-10-10</time><span><b>Closest build for everyone else</b> <span class="pill unv">not yet checked in game</span> a character on none of Build Advisor&#39;s builds gets the most similar one (class levels, subclass, main ability, caster type, weapon style); the <kbd>F6</kbd> header shows it with its similarity and the tooltips say "(closest build)". Build Advisor&#39;s window lists the build&#39;s gear sets from Loot Advisor.</span></li>
         <li><time>2026-10-10</time><span><b>Markers for everyone</b>: the map marks the items of the whole party, the camp, companions who may still join, Tavs and hirelings, one marker per spot listing whose items they are; a marker filter and tie picks in the F6 list and on the Sets page. A spoiler warning in the F6 list and on the Sets page. Item warnings in tooltips now take up to three lines without losing a detail. The pak is compressed (about 1.2 MB).</span></li>
         <li><time>2026-10-10</time><span><b>Crash fixed</b>: the interface pass could read a menu element the game had just freed and crash the game in combat. All interface changes now go through Script Extender v33's safe call; checked in the game with ten combat rounds and no crash.</span></li>
         <li><time>2026-10-09</time><span><b>Shorter advice, checked in the game</b>: tooltip advice is one row of at most two lines with the rainbow diamond, in cyan (bags, both sides of trade, pickpocketing, corpse loot, camp chest); map labels list only the item names; the marker popup has a "Loot Advisor" title; items shown only in the list get no frame and no tooltip row.</span></li>

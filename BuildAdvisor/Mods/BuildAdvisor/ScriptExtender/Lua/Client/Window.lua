@@ -355,6 +355,7 @@ function BA.UI.Outline(ctx, entry, analysis)
   add(about, "text", b.why)
   if creation and b.raceWhy then add(about, "text", "Race: " .. b.raceWhy) end
   if b.note then add(about, "text", b.note) end
+  add(about, "note", "Respec any time at camp with Withers (100 gold). The mod follows you through every level-up after a respec.")
   return { main = main, about = about }
 end
 
@@ -418,9 +419,18 @@ function BA.UI.Render(ctx, ranked, selectedIdx, analysis)
     text(row:AddCell(), table.concat(lv.picks, "; "), color)
   end
 
-  local g = c:AddCollapsingHeader("Gear & tips")
-  text(g, "Key gear: " .. (b.gear or "-"))
-  text(g, "Respec any time at camp with Withers (100 gold). The mod follows you through every level-up after a respec.", GREY)
+  -- the build's gear sets from Loot Advisor: one folded section per set, a list per act inside
+  local gear = BA.Gear.Outline(ctx, b, BA.Gear.Api())
+  c:AddSpacing()
+  if gear.header then colored(c:AddSeparatorText(gear.header), GOLD) end
+  for _, set in ipairs(gear.sets) do
+    local h = c:AddCollapsingHeader(set.title)
+    for _, act in ipairs(set.acts) do
+      text(h, act.title, GOLD)
+      for _, line in ipairs(act.items) do bullet(h, line) end
+    end
+  end
+  text(c, gear.ref, GREY)
 
   c:AddSpacing()
   text(c, footer, GREY)
