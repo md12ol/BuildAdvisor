@@ -395,6 +395,7 @@ entities.CCLevelUpDefinition = nil
 -- 12b) Spell icons as the game builds them (CCLib SpellIconTemplate): the Border "border" reads no DataContext;
 -- the spell is on the list item's ContentPresenter (ls.VMSpellReference, Spell) and on the elements inside the
 -- icon. The view model names the spell by a loca handle (with or without ";1") or by a stats id.
+do -- its own scope: the main chunk is near Lua's 200 locals
 local LOCA = { hb1e55000g0001g = "Bless", hc0e00000g0002g = "Healing Word", hc0e00000g0003g = "Cure Wounds",
                hc0e00000g0004g = "Command", hc0e00000g0005g = "Command: Halt", hc0e00000g0006g = "Counterspell",
                hc0e00000g0007g = "Shield of Faith", hc0e00000g0008g = "Witch Bolt" }
@@ -507,6 +508,7 @@ tick()
 expect(not ringed(reIcon), "ring removed when the screen closes")
 Ext.Stats = nil
 Ext.Loca.GetTranslatedString = locaBefore
+end
 
 -- 13) Origins and the Dark Urge list
 local function firstBuilds(origin, cls)
