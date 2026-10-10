@@ -35,6 +35,7 @@ FMTS = {
     "banner": (1920, 1080, 1, False, None, "banner"),
     "thumb": (1024, 1024, 1, False, None, "thumb"),
     "docs": (1600, 400, 1, False, None, "docs"),
+    "logo": (1280, 720, 1, False, None, "logo"),
     "sets": (1440, 240, 1, False, None, "sets"),
     "mark": (128, 128, 4, True, (128, 128), "mark128"),
     "marksm": (64, 64, 4, True, (64, 64), "mark64"),

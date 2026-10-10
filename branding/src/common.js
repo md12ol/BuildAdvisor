@@ -1,4 +1,4 @@
-/* Shared data and builders for option1/2/3.html.  URL: optionN.html?mod=ba|la&fmt=banner|thumb|docs|mark|marksm|wordmark|sets */
+/* Shared data and builders for option1/2/3.html.  URL: optionN.html?mod=ba|la&fmt=banner|thumb|docs|logo|mark|marksm|wordmark|sets */
 (function () {
   const q = new URLSearchParams(location.search);
   const MOD = q.get("mod") || "la";
