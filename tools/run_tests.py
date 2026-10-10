@@ -25,17 +25,19 @@ def mock_test():
     return lua.execute(lua_file("mock_test.lua").replace("local ROOT = ...", 'local ROOT = "%s"' % root))
 
 
-def gate(defer, unsafe, patches):
+def gate(defer, unsafe, patches, menu=False):
     lua = lupa.LuaRuntime()
     fn = lua.eval("function(...) return load(...) end")(lua_file("ui_gate_test.lua"), "@ui_gate_test.lua")
     lua_patches = lua.table_from({k: lua.table_from([lua.table_from(p) for p in v]) for k, v in patches.items()})
-    return fn(root, defer, unsafe, lua_patches)
+    return fn(root, defer, unsafe, lua_patches, menu)
 
 
 def gate_failures(patches=None):
     """Old Script Extender: the tree is never touched, one log line names v33, the advisor window still renders.
     Ext.UI.Defer present: every touch is inside the deferred callback and the walk reaches the menu labels.
-    Old Script Extender with UnsafeUiOnOldSE: the walk runs."""
+    Old Script Extender with UnsafeUiOnOldSE: the walk runs.
+    The game's pause menu open (Ext.UI.Defer present): the window is closed under it, the hotkey there does not open
+    it, and it comes back when the menu closes; old Script Extender: the menu is not looked for (no touches)."""
     patches = patches or {}
     fails = []
     r = gate(False, False, patches)
@@ -54,7 +56,22 @@ def gate_failures(patches=None):
     r = gate(False, True, patches)
     if r.labels == 0:
         fails.append("no Ext.UI.Defer, UnsafeUiOnOldSE = true: the highlighter never reached a menu label")
-    return fails, r.ticks
+    ticks = r.ticks
+    r = gate(True, False, patches, menu=True)
+    if r.outside != 0:
+        fails.append(f"pause menu: {r.outside} UI tree touches outside the deferred callback (must be 0)")
+    if not r.openBefore:
+        fails.append("pause menu: the advisor window was not open before it (nothing checked)")
+    if not r.hiddenInMenu:
+        fails.append("pause menu open: the advisor window stays drawn over it")
+    if r.openAfterKeys:
+        fails.append("pause menu open: the hotkey opened the window over it")
+    if not r.reopened:
+        fails.append("pause menu closed: the advisor window did not come back")
+    r = gate(False, False, patches, menu=True)
+    if r.touches != 0:
+        fails.append(f"no Ext.UI.Defer, pause menu open: the UI tree was touched {r.touches} times (must be 0)")
+    return fails, ticks
 
 
 META_DESCRIPTION_MAX = 250   # Larian's Toolkit (mod.io publishing) caps the mod description at 250 characters
@@ -90,6 +107,14 @@ MUTATIONS = [
      {"Highlighter.lua": [("defer(function() pcall(fn) end)", "pcall(fn)")]}),
     ("Main.lua: the highlight pass called straight from the tick again",
      {"Main.lua": [("BA.HL.Run(function()", "pcall(function()")]}),
+    ("Highlighter.lua: the pause menu widget is not recognised",
+     {"Highlighter.lua": [("BA.HL.PAUSE_WIDGETS = { GameMenu = true,", "BA.HL.PAUSE_WIDGETS = { GameMenuX = true,")]}),
+    ("Main.lua: the pause menu read straight from the tick",
+     {"Main.lua": [("BA.HL.Run(BA.HL.CheckMenu)", "pcall(BA.HL.CheckMenu)")]}),
+    ("Window.lua: the window is not reopened after the pause menu",
+     {"Window.lua": [("  elseif BA.UI.reopen then", "  elseif false then")]}),
+    ("Window.lua: the hotkey opens the window over the pause menu",
+     {"Window.lua": [("  if BA.UI.menuHidden then", "  if false then")]}),
 ]
 
 
@@ -113,7 +138,7 @@ def main():
     fails, ticks = gate_failures()
     for f in fails:
         print("FAIL: " + f)
-    print(f"UI-thread gate: 3 scenarios x {ticks} ticks, {len(fails)} failures")
+    print(f"UI-thread gate: 5 scenarios x {ticks} ticks, {len(fails)} failures")
     desc = meta_description()
     desc_fails = description_failures(desc)
     for f in desc_fails:

@@ -2,8 +2,9 @@
 -- Noesis renders in parallel with Lua, so before Script Extender v33 (no Ext.UI.Defer) the mod must leave the tree
 -- alone unless the player opts in (UnsafeUiOnOldSE), and with Ext.UI.Defer every touch must happen inside the
 -- deferred callback. Run by tools/run_tests.py, once per scenario:
---   ROOT, DEFER (bool), UNSAFE (bool), PATCHES ({ [file name] = { {old, new}, ... } }) -> result table
-local ROOT, DEFER, UNSAFE, PATCHES = ...
+--   ROOT, DEFER (bool), UNSAFE (bool), PATCHES ({ [file name] = { {old, new}, ... } }), MENU (bool: the game's
+--   pause menu widget is open during the first ticks, then closed) -> result table
+local ROOT, DEFER, UNSAFE, PATCHES, MENU = ...
 local LUA = ROOT .. "/BuildAdvisor/Mods/BuildAdvisor/ScriptExtender/Lua/"
 
 local R = { touches = 0, outside = 0, labels = 0, prints = {}, renders = 0 }
@@ -15,13 +16,15 @@ local function touch(label)
 end
 
 -- UI tree: every field read is counted; the labels are names a Paladin start recommends
-local function el(text, kids)
-  local d = { Text = text, kids = kids or {} }
+local function el(text, kids, ty, name, props)
+  local d = { Text = text, kids = kids or {}, Type = ty or "TextBlock", Name = name, props = props or {} }
   return setmetatable({}, {
     __index = function(_, k)
       touch(text ~= nil)
       if k == "Text" then return d.Text end
-      if k == "Type" then return "TextBlock" end
+      if k == "Type" then return d.Type end
+      if k == "Name" then return d.Name end
+      if k == "GetProperty" then return function(_, p) touch(text ~= nil); return d.props[p] end end
       if k == "VisualChildrenCount" then return #d.kids end
       if k == "VisualChild" then return function(_, i) touch(text ~= nil); return d.kids[i] end end
       if k == "GetProperty" or k == "SetProperty" or k == "Resource" then return function() touch(text ~= nil) end end
@@ -30,7 +33,9 @@ local function el(text, kids)
     __newindex = function(_, k, v) touch(text ~= nil); if k == "Text" then d.Text = v end end,
   })
 end
-local uiRoot = el(nil, { el("Half-Orc"), el("Human"), el(nil, { el("Paladin"), el("Sorcerer") }), el("Athletics") })
+local uiKids = { el("Half-Orc"), el("Human"), el(nil, { el("Paladin"), el("Sorcerer") }), el("Athletics") }
+local uiRoot = el(nil, uiKids)
+if MENU then uiKids[#uiKids + 1] = el(nil, { el(nil, {}, "ls.UIWidget", "GameMenu", { Visibility = "Visible" }) }) end
 
 -- IMGUI window: any Add* call returns another node; the window counts renders through AddText
 local function node()
@@ -97,15 +102,31 @@ _D = out
 loadMod("BootstrapClient.lua")
 for _, f in ipairs(subs.SessionLoaded) do f() end
 R.ticks = 0
-for _ = 1, 8 do
-  now = now + 1100
-  for _, f in ipairs(subs.Tick) do f() end
-  local q = deferred
-  deferred = {}
-  inDefer = true
-  for _, f in ipairs(q) do f() end
-  inDefer = false
-  R.ticks = R.ticks + 1
+local function ticks(n)
+  for _ = 1, n do
+    now = now + 1100
+    for _, f in ipairs(subs.Tick) do f() end
+    local q = deferred
+    deferred = {}
+    inDefer = true
+    for _, f in ipairs(q) do f() end
+    inDefer = false
+    R.ticks = R.ticks + 1
+  end
+end
+ticks(8)
+-- the pause menu: the window is closed under it; the hotkey there only changes what happens after it
+R.openBefore = rawget(BA.UI.window, "Open") == true or BA.UI.reopen == true
+R.hiddenInMenu = BA.UI.menuHidden == true and rawget(BA.UI.window, "Open") ~= true
+if MENU then
+  local menu = uiKids[#uiKids]
+  uiKids[#uiKids] = nil
+  ticks(2)
+  R.reopened = rawget(BA.UI.window, "Open") == true
+  uiKids[#uiKids + 1] = menu
+  ticks(2)
+  BA.UI.Toggle()
+  R.openAfterKeys = rawget(BA.UI.window, "Open") == true
 end
 -- leaving the screen: the restore pass must also wait for Ext.UI.Defer
 entities.CCCharacterDefinition = nil
