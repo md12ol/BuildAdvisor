@@ -430,6 +430,86 @@ for _, b in ipairs(BA.Builds) do
 end
 
 
+-- 15) window content: the respec screen of Lae'zel (locked race) with one ability off the plan
+local function rowsOf(list, style)
+  local out = {}
+  for _, r in ipairs(list) do if not style or r.style == style then out[#out + 1] = r.text end end
+  return out
+end
+local lz = { mode = "Respec", level = 1, name = "Lae'zel", origin = "Laezel", race = { display = "Githyanki" },
+  pendingClass = { name = "Fighter" }, classes = { { name = "Fighter", display = "Fighter", level = 1 } },
+  abilities = { STR = 15, DEX = 12, CON = 15, INT = 8, WIS = 14, CHA = 8 }, racial = { STR = 2, CON = 1 } }
+local lzEntry = BA.RankBuilds(lz, false)[1]
+expect(lzEntry.build.id == "bmgiant", "Lae'zel respec recommends bmgiant")
+local out = BA.UI.Outline(lz, lzEntry, BA.Analyse(lz, lzEntry.build))
+local skillRows, raceRows = 0, {}
+for _, t in ipairs(rowsOf(out.main)) do
+  if t:find("^Skills:") then skillRows = skillRows + 1 end
+  if t:find("^Race:") then raceRows[#raceRows + 1] = t end
+end
+expect(skillRows == 1, "one Skills line on the respec screen (class share not repeated): " .. skillRows)
+expect(#raceRows == 1 and raceRows[1] == "Race: Githyanki (locked for Lae'zel)", "locked race shown short: " .. tostring(raceRows[1]))
+local why = rowsOf(out.main, "note")[1] or ""
+expect(why:find("^Best for Lae'zel%. Stays Fighter") ~= nil and not why:find("locked"), "why line: origin name, no repeated race: " .. why)
+local warns, oks = rowsOf(out.main, "warn"), rowsOf(out.main, "ok")
+expect(#warns == 1 and warns[1]:find("^DEX: 12 %-> set 10") ~= nil, "the one ability off the plan gets its own row: " .. tostring(warns[1]))
+expect(#oks == 1 and oks[1] == "Matches the plan: class", "matching choices in one row, locked race left out: " .. tostring(oks[1]))
+local hasNote = false
+for _, t in ipairs(rowsOf(out.about)) do if t:find("already a Fighter") then hasNote = true end end
+expect(hasNote, "build note moves to the folded About section")
+lz.abilities.DEX = 10
+out = BA.UI.Outline(lz, lzEntry, BA.Analyse(lz, lzEntry.build))
+oks = rowsOf(out.main, "ok")
+expect(#oks == 1 and oks[1] == "All match the plan: class, abilities" and #rowsOf(out.main, "warn") == 0, "all choices fine: one green row: " .. tostring(oks[1]))
+lz.pendingClass = { name = "Wizard" }
+out = BA.UI.Outline(lz, lzEntry, BA.Analyse(lz, lzEntry.build))
+local bad = rowsOf(out.main, "bad")
+expect(#bad == 1 and bad[1]:find("take Fighter") ~= nil, "wrong class gets a red row: " .. tostring(bad[1]))
+local lv = { mode = "Level Up", level = 5, name = "Lae'zel", origin = "Laezel", race = { display = "Githyanki" },
+  pendingClass = { name = "Fighter" }, classes = { { name = "Fighter", display = "Fighter", level = 4 } } }
+out = BA.UI.Outline(lv, lzEntry, BA.Analyse(lv, lzEntry.build))
+local items = rowsOf(out.main, "item")
+expect(items[1] == "Level 5: Fighter" and #items == 1, "level-up: only this level's class and picks: " .. tostring(items[1]))
+
+-- 16) placement: beside the game's left panel in the menus, the old spot outside, the player's move kept
+local pos1, size1 = BA.UI.DockRect(2560, 1600)
+local s16 = 1600 / 2160
+expect(math.abs(pos1[2] - 148 * s16) < 0.5 and math.abs(pos1[2] + size1[2] - 1852 * s16) < 0.5,
+  string.format("dock top / bottom = the left panel's frame: %.0f-%.0f", pos1[2], pos1[2] + size1[2]))
+expect(math.abs(pos1[1] - 1530 * s16) < 0.5 and pos1[1] + size1[1] <= 2560 - 790 * s16 + 0.5,
+  string.format("dock left of the summary panel: x %.0f-%.0f", pos1[1], pos1[1] + size1[1]))
+local pos2, size2 = BA.UI.DockRect(1920, 1080)
+expect(math.abs(pos2[2] - 74) < 0.5 and math.abs(size2[2] - 852) < 0.5, "dock scales with the screen height (1080p)")
+local w = BA.UI.window
+local placed = {}
+rawset(w, "SetPos", function(_, p) placed[#placed + 1] = { pos = p } end)
+rawset(w, "SetSize", function(_, sz) placed[#placed].size = sz end)
+Ext.IMGUI.GetViewportSize = function() return { 2560, 1600 } end
+BA.UI.placement, BA.UI.userPlaced = nil, nil
+entities.ClientControl = nil
+entities.CCRespecDefinition = { { CCRespecDefinition = { Definition = {
+  Name = "Shadowheart", Abilities = { 0, 10, 13, 14, 10, 17, 8 },
+  Definition = { Race = "helf", Subrace = "", Origin = "sh" },
+  LevelUpData = { Class = "clr", SubClass = "", Upgrades = { AbilityBonuses = {} } } } } } }
+tick(); log = {}
+local last = placed[#placed]
+expect(w.Open == true and last and math.abs(last.pos[1] - pos1[1]) < 0.5 and math.abs(last.size[2] - size1[2]) < 0.5,
+  "respec auto-open docks the window beside the left panel")
+rawset(w, "LastPosition", { last.pos[1], last.pos[2] }); rawset(w, "LastSize", { last.size[1], last.size[2] })
+tick(); log = {}
+local n = #placed
+rawset(w, "LastPosition", { 300, 200 }) -- the player drags the window
+tick(); log = {}
+expect(BA.UI.userPlaced == true, "a move by the player is noticed")
+BA.UI.placement.kind = "free"; BA.UI.Place(true)
+expect(#placed == n, "a moved window is never put back")
+rawset(w, "LastSize", { 600, 900 })
+tick(); log = {}
+expect(BA.UI.widthPx == 600, "text re-wraps to the player's width")
+entities.CCRespecDefinition = nil
+tick(); log = {}
+Ext.IMGUI.GetViewportSize = nil
+
 -- 7) every build has 12 levels, valid abilities (27 point buy) and classes
 local cost = { [8] = 0, [9] = 1, [10] = 2, [11] = 3, [12] = 4, [13] = 5, [14] = 7, [15] = 9 }
 for _, b in ipairs(BA.Builds) do

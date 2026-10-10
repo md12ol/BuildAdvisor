@@ -25,6 +25,18 @@ function BA.OriginInfo(ctx)
   return BA.Origins[BA.OriginKey(ctx)]
 end
 
+-- the game's origin resource names are ids ("DarkUrge", "Laezel"): show the names players know
+local ORIGIN_NAME = { darkurge = "The Dark Urge", laezel = "Lae'zel" }
+function BA.OriginLabel(o)
+  return ORIGIN_NAME[BA.Norm(o)] or (tostring(o):gsub("(%l)(%u)", "%1 %2"))
+end
+
+-- Origin characters keep their race; a custom Tav and the Dark Urge choose it
+function BA.RaceLocked(ctx)
+  local key = BA.OriginKey(ctx)
+  return BA.OriginInfo(ctx) ~= nil and key ~= "generic" and key ~= "darkurge"
+end
+
 -- The class that was (or is being) taken at level 1
 local function startClass(ctx)
   if ctx.mode ~= "Level Up" and ctx.pendingClass then return ctx.pendingClass.name end
@@ -41,7 +53,7 @@ function BA.RankBuilds(ctx, showAll)
 
   local origin = BA.OriginInfo(ctx)
   if origin then
-    for _, id in ipairs(origin.builds) do add(BA.BuildById[id], "Best for " .. tostring(ctx.origin)) end
+    for _, id in ipairs(origin.builds) do add(BA.BuildById[id], "Best for " .. BA.OriginLabel(ctx.origin)) end
   end
 
   local start = ctx and startClass(ctx)
@@ -85,15 +97,18 @@ function BA.Analyse(ctx, build)
     local rn = BA.Norm(ctx.race.display)
     local best, alt = BA.Norm(build.races[1]), false
     for i = 2, #build.races do if rn == BA.Norm(build.races[i]) then alt = true end end
-    local locked = BA.OriginInfo(ctx) and BA.OriginKey(ctx) ~= "generic" and BA.OriginKey(ctx) ~= "darkurge"
-    if locked then
-      table.insert(a.checks, { ok = true, text = "Race: " .. tostring(ctx.race.display) .. " (locked for this origin)" })
+    -- label: the short name the window lists among the matching choices; locked: nothing to choose
+    if BA.RaceLocked(ctx) then
+      table.insert(a.checks, { ok = true, locked = true, label = "race",
+                               text = "Race: " .. tostring(ctx.race.display) .. " (locked for this origin)" })
     elseif rn == best or rn:find(best, 1, true) then
-      table.insert(a.checks, { ok = true, text = "Race: " .. ctx.race.display .. " - best pick" })
+      table.insert(a.checks, { ok = true, label = "race", text = "Race: " .. ctx.race.display .. " - best pick" })
     elseif alt then
-      table.insert(a.checks, { ok = true, text = "Race: " .. ctx.race.display .. " - good alternative (best: " .. build.races[1] .. ")" })
+      table.insert(a.checks, { ok = true, label = "race (an alternative)",
+                               text = "Race: " .. ctx.race.display .. " - good alternative (best: " .. build.races[1] .. ")" })
     else
-      table.insert(a.checks, { ok = false, text = "Race: " .. tostring(ctx.race.display) .. " -> pick " .. table.concat(build.races, " / ") })
+      table.insert(a.checks, { ok = false, label = "race",
+                               text = "Race: " .. tostring(ctx.race.display) .. " -> pick " .. table.concat(build.races, " / ") })
     end
   end
 
@@ -104,7 +119,7 @@ function BA.Analyse(ctx, build)
   end
   if ctx.pendingClass and ctx.mode ~= "Party" then
     local ok = ctx.pendingClass.name == want
-    table.insert(a.checks, { ok = ok, text = ok and ("Class this level: " .. want) or
+    table.insert(a.checks, { ok = ok, label = "class", text = ok and ("Class this level: " .. want) or
       ("Class this level: " .. tostring(ctx.pendingClass.name) .. " -> take " .. want) })
   end
 
@@ -145,11 +160,11 @@ function BA.Analyse(ctx, build)
       local cur = ctx.abilities[ab]
       if cur and target then
         if ctx.abilitiesAreFinal then
-          table.insert(a.checks, { ok = cur >= target + bonus, text = string.format("%s %d (plan >= %d)", ab, cur, target + bonus), minor = true })
+          table.insert(a.checks, { ok = cur >= target + bonus, label = ab, text = string.format("%s %d (plan >= %d)", ab, cur, target + bonus), minor = true })
         else
           local curBonus = (ctx.racial and ctx.racial[ab]) or 0
           local okBase = cur == target or cur + curBonus == target + bonus
-          table.insert(a.checks, { ok = okBase, minor = true,
+          table.insert(a.checks, { ok = okBase, minor = true, label = ab,
             text = string.format("%s: %d -> set %d%s", ab, cur, target, bonus > 0 and (" (+" .. bonus .. " racial)") or "") })
         end
       end

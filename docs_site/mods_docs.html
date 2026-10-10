@@ -368,7 +368,7 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
 
       <h3 id="ba-window">The advisor window</h3>
       <div class="prose">
-        <p>The window sits between the game's selection and summary panels the first time it opens. Move or resize it like any Script Extender window. <kbd>F7</kbd> shows or hides it. It closes by itself when character creation, respec or level-up ends.</p>
+        <p>In character creation, respec and level-up the window sits right of the game's selection panel, with the same top and bottom as that panel, and stops short of the summary panel on the right. Outside these screens it opens between where the two panels would be. Move or resize it like any Script Extender window: once you do, it stays where you put it for the rest of the session. <kbd>F7</kbd> shows or hides it. It closes by itself when character creation, respec or level-up ends.</p>
       </div>
       <div class="tw"><table>
         <thead><tr><th>Part</th><th>What it means</th></tr></thead>
@@ -377,17 +377,16 @@ details.dev .dev-body h5 { font-size: var(--fs-s); margin: 1rem 0 .3rem; font-fa
           <tr><td class="nw">Show all builds</td><td>Lists all 22 builds, not only the ones that fit.</td></tr>
           <tr><td class="nw">Highlight in game menus</td><td>Turns the stars and point-buy targets on or off. The window still works without them.</td></tr>
           <tr><td class="nw">Auto-open</td><td>Opens the window by itself in creation, respec and level-up.</td></tr>
-          <tr><td class="nw"><span class="gchip c-gold">Mode: …</span></td><td>Character Creation, Respec, Level Up (with the new level) or Party (with "showing your next level").</td></tr>
-          <tr><td class="nw">Character line</td><td>Name, origin, race and current classes with subclass and level. A grey note follows for origin characters (for example "High Elf (locked)").</td></tr>
-          <tr><td class="nw">Build header</td><td>The build name, then <span class="gchip c-gold">Tier – role</span>, why it is strong, and "Why suggested" (best for this origin, starts as your class, uses your class, or matches your classes).</td></tr>
-          <tr><td class="nw"><span class="gchip c-green">DO THIS NOW</span></td><td>What to pick on this screen: "Level N: take a level in X" and its choices. In creation and respec it also lists the race (best first, with the reason), background, point buy with the +2 / +1 split, and skills. In the party view this heading reads <b>NEXT LEVEL-UP</b>.</td></tr>
-          <tr><td class="nw">Your current choices</td><td><span class="gchip c-green">[OK]</span> a choice that matches the plan; <span class="gchip c-red">[CHANGE]</span> a choice to fix, with what to pick instead (race, this level's class, each ability score).</td></tr>
-          <tr><td class="nw"><span class="gchip c-red">! warning</span></td><td>Your class levels differ from the plan. Keep following the plan, or respec with Withers (100 gold) to line up.</td></tr>
+          <tr><td class="nw"><span class="gchip c-gold">Screen: character</span></td><td>The screen (New character, Respec, Level up to N, Party) followed by the name, origin, race and current classes with subclass and level.</td></tr>
+          <tr><td class="nw">Build header</td><td>The build name, then <span class="gchip c-gold">Tier – role</span>, then one grey line on why it was suggested (best for this origin, starts as your class, uses your class, or matches your classes) with the origin's advice.</td></tr>
+          <tr><td class="nw"><span class="gchip c-gold">Do this now</span></td><td>What to pick on this screen. In creation and respec: race (best first and the alternatives; an origin's locked race in one short line), class with its choices, background, abilities with the +2 / +1 split, skills and, for clerics, the deity. In level-up: "Level N: class" and its choices. In the party view this heading reads <b>Next level-up</b>.</td></tr>
+          <tr><td class="nw">Your choices</td><td>One <span class="gchip c-green">green</span> line names what already matches the plan (race, class, abilities). Each choice to change gets its own row with what to pick instead: <span class="gchip c-red">red</span> for race or class, amber for an ability score or class levels that differ from the plan (keep following the plan, or respec with Withers for 100 gold).</td></tr>
+          <tr><td class="nw">About this build</td><td>Folded: why the build is strong, the race reasons and the build's tips.</td></tr>
           <tr><td class="nw">Full level 1–12 plan</td><td>Folded table: level, class, choices. The current level is gold, past levels are grey.</td></tr>
           <tr><td class="nw">Gear &amp; tips</td><td>The build's key items and a reminder about Withers.</td></tr>
         </tbody>
       </table></div>
-      <p class="prose"><b>Colours:</b> <span class="gchip c-green">green</span> do this / correct, <span class="gchip c-red">red</span> change this, <span class="gchip c-gold">gold</span> headings and the current level, <span class="gchip c-grey">grey</span> notes and past levels.</p>
+      <p class="prose"><b>Colours:</b> <span class="gchip c-green">green</span> already matches, <span class="gchip c-red">red</span> or amber change this, <span class="gchip c-gold">gold</span> headings and the current level, <span class="gchip c-grey">grey</span> notes and past levels.</p>
 
       <h3 id="ba-builds">Builds included</h3>
       <p class="prose">22 builds: Patch 8 community rankings plus builds from damage and defence models made for the origin companions. Each origin character gets its own short list (first = recommended); a custom Tav gets builds that start as, or use, the class picked.</p>
