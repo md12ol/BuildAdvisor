@@ -130,11 +130,54 @@ local function classesOf(e)
   return list
 end
 
-local function firstEntity(component)
-  local list = try(Ext.Entity.GetAllEntitiesWithComponent, component)
-  if list and #list > 0 then return list[1] end
+local function userOf(ch)
+  if not ch then return nil end
+  return try(function() return ch.UserReservedFor.UserID end) or try(function() return ch.PartyMember.UserId end)
+end
+
+local function isControlled(ch)
+  return ch ~= nil and try(function() return ch.ClientControl ~= nil end) == true
+end
+
+-- The player at this client: the owner of a character it controls
+local function localUser()
+  for _, ch in ipairs(try(Ext.Entity.GetAllEntitiesWithComponent, "ClientControl") or {}) do
+    local id = userOf(ch)
+    if id then return id end
+  end
   return nil
 end
+
+-- In multiplayer every player's creation, respec and level-up definition reaches every client, in an order that
+-- changes from one query to the next. This client follows only its own: the definition of a character it
+-- controls, else one its player owns, else the one it showed last. One owned by another player is never taken.
+-- charOf(entity) gives the definition's character.
+local shown = {} -- component -> tostring of the entity shown last
+local function ownEntity(component, charOf)
+  local list = try(Ext.Entity.GetAllEntitiesWithComponent, component) or {}
+  local me = localUser()
+  local owned, unknown = nil, {}
+  for _, e in ipairs(list) do
+    local ch = charOf(e)
+    if isControlled(ch) then owned = e; break end
+    local owner = userOf(ch)
+    if me ~= nil and owner == me then
+      owned = owned or e
+    elseif me == nil or owner == nil then
+      unknown[#unknown + 1] = e
+    end
+  end
+  local pick = owned
+  if not pick then
+    for _, e in ipairs(unknown) do if tostring(e) == shown[component] then pick = e end end
+    pick = pick or unknown[1]
+  end
+  shown[component] = pick and tostring(pick) or nil
+  return pick
+end
+
+local function itself(e) return e end
+local function levelUpCharacter(e) return try(function() return e.CCLevelUpDefinition.Character end) end
 
 -- Character-creation style definition (new game or Withers respec)
 local function fromCharacterDefinition(def, mode)
@@ -155,7 +198,7 @@ end
 
 function BA.Detect()
   -- 1) Level up
-  local e = firstEntity("CCLevelUpDefinition")
+  local e = ownEntity("CCLevelUpDefinition", levelUpCharacter)
   if e then
     local ctx = try(function()
       local lu = e.CCLevelUpDefinition
@@ -174,7 +217,7 @@ function BA.Detect()
 
   -- 2) Withers respec (character-creation screen at level 1)
   for _, comp in ipairs({ "CCRespecDefinition", "CCFullRespecDefinition" }) do
-    e = firstEntity(comp)
+    e = ownEntity(comp, itself)
     if e then
       local ctx = try(function()
         local d = e[comp].Definition
@@ -194,7 +237,7 @@ function BA.Detect()
   end
 
   -- 3) New game character creation
-  e = firstEntity("CCCharacterDefinition")
+  e = ownEntity("CCCharacterDefinition", itself)
   if e then
     local ctx = try(function() return fromCharacterDefinition(e.CCCharacterDefinition.Definition, "Character Creation") end)
     if ctx then return ctx end

@@ -320,6 +320,11 @@ function BA.UI.Outline(ctx, entry, analysis)
   if creation then add(main, "item", raceLine(ctx, b)) end
   if step then
     add(main, "item", creation and ("Class: " .. step.cls) or string.format("Level %d: %s", stepLevel, step.cls))
+    if analysis.classMove == "add" then
+      add(main, "sub", "New class: click Add Class (the button at the top right of the level-up panel), then pick " .. step.cls)
+    elseif analysis.classMove == "switch" then
+      add(main, "sub", "Switch the class at the top of the level-up panel to " .. step.cls .. " with the arrows")
+    end
     for _, p in ipairs(step.picks) do
       -- creation lists every skill below; the class's share would say it twice
       if not (creation and p:find("^Skills:")) then add(main, "sub", p) end
