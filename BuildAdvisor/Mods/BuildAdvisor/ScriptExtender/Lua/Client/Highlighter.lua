@@ -12,6 +12,8 @@
 --    game's "frame" selector image gets our ring as its Background (drawn around the picture; the game's own
 --    hover / selection frame keeps working on top of it)
 --  * spell and cantrip icons: the icon's 4-pixel "border" Border gets our ring brush as BorderBrush
+--  * the level-up screen's Add Class button and the class carousel's side icons: the Grid of their template gets
+--    the tile ring as its Background, like a tile
 -- Feats, fighting styles, manoeuvres, invocations, metamagic and other passive choices are text rows in the game
 -- (check box + name), so they get the star only.
 
@@ -355,6 +357,24 @@ local function outline(el, prop, brush, want, A)
   return false
 end
 
+-- Level-up class controls (CharacterLevelUp.xaml): the Add Class button (an image only; its name is in the tooltip)
+-- and the carousel icons left and right of the selected class, which switch to the class they show
+local ADD_CLASS_BUTTON = "AddClassButton"
+local CAROUSEL_SIDES = { CarouselLeftItem = true, CarouselRightItem = true }
+
+-- The Grid holding a carousel icon's picture (the Image "icon"), a few levels inside the item
+local function iconHolder(el, depth)
+  for i = 1, (try(getCount, el) or 0) do
+    local c = try(getChild, el, i)
+    if c then
+      if try(getName, c) == "icon" then return el end
+      local deeper = depth < 4 and iconHolder(c, depth + 1)
+      if deeper then return deeper end
+    end
+  end
+  return nil
+end
+
 ------------------------------------------------------------------ ability rows
 -- Point-buy rows (character creation / respec) and the ability rows of Ability Improvement and of feats with an
 -- ability choice (level-up) have an ls.VMAbility DataContext (Ability = "Strength"). The ability name gets the
@@ -439,7 +459,8 @@ end
 -- wanted: table normalized -> original string; nil/empty = restore everything
 -- abilityPlan: { STR = { final = 17, bonus = 2 }, ... } or nil
 -- skillPlan: { "Athletics", ... } or nil
--- opts: { onlyPlannedAbilities = true } at level-up (ability improvement rows)
+-- opts: onlyPlannedAbilities (level-up: ability improvement rows), addClass (ring the Add Class button),
+--       fresh (the screen has just opened or changed: rows that read empty are read again on this pass)
 function BA.HL.Apply(wanted, abilityPlan, skillPlan, opts)
   wanted = wanted or {}
   opts = opts or {}
@@ -474,7 +495,7 @@ function BA.HL.Apply(wanted, abilityPlan, skillPlan, opts)
     if hasWanted and isItemType(ty) then label = itemLabel(el, wanted); once = nil end
     local key = (ty == "ContentPresenter") and tostring(el) or nil
     local shape = key and unreadableDC[key] and shapeOf(el)
-    if key and (not unreadableDC[key] or unreadableDC[key] ~= shape or pass % RETRY_PASSES == 0) then
+    if key and (not unreadableDC[key] or unreadableDC[key] ~= shape or opts.fresh or pass % RETRY_PASSES == 0) then
       local dc = try(getDC, el)
       unreadableDC[key] = (dc == nil) and (shape or shapeOf(el)) or nil
       local dcType = dc and try(getType, dc)
@@ -509,6 +530,15 @@ function BA.HL.Apply(wanted, abilityPlan, skillPlan, opts)
           if debug and not panelAnc then panelAnc = stack[math.max(0, depth - 6)] end
         end
       end
+    end
+
+    if ty and ty:find("Button", 1, true) and try(getName, el) == ADD_CLASS_BUTTON then
+      local face = try(getChild, el, 1)
+      if face and outline(face, "Background", A.tile, hasWanted and opts.addClass == true, A) then outlines = outlines + 1 end
+    elseif ty == "Control" and CAROUSEL_SIDES[try(getName, el) or ""] then
+      local holder = iconHolder(el, 0)
+      local want = hasWanted and vmLabel(try(getDC, el), wanted) ~= nil
+      if holder and outline(holder, "Background", A.tile, want, A) then outlines = outlines + 1 end
     end
 
     -- spell / cantrip icon: the 4-pixel Border "border" of SpellIconTemplate

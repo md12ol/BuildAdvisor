@@ -762,6 +762,120 @@ loaded[LA_UUID] = nil
 Mods = nil
 log = {}
 
+-- 18) level-up in multiplayer, at a multiclass level, and right after the screen opens
+do
+local function lu(ch, cls) return { CCLevelUpDefinition = { Character = ch, LevelUp = { LevelUpData = { Class = cls, SubClass = "" } } } } end
+local function paladin6(user)
+  return { EocLevel = { Level = 6 }, Classes = { Classes = { { ClassUUID = "pal", SubClassUUID = "ven", Level = 6 } } },
+           Origin = { Origin = "Generic" }, Race = { Race = "horc" }, DisplayName = { Name = ts("Tav") },
+           UserReservedFor = user and { UserID = user } or nil }
+end
+local function wizard3(user)
+  return { EocLevel = { Level = 3 }, Classes = { Classes = { { ClassUUID = "wiz", SubClassUUID = "evo", Level = 3 } } },
+           Origin = { Origin = "Gale" }, Race = { Race = "human" }, DisplayName = { Name = ts("Gale") },
+           UserReservedFor = user and { UserID = user } or nil }
+end
+-- this client's player (user 1) controls a third character; user 2 levels Gale at the same time
+local ctl = paladin6(1); ctl.ClientControl = {}; ctl.DisplayName = { Name = ts("Karlach") }; ctl.Origin = { Origin = "Karlach" }
+entities.ClientControl = { ctl }
+local mine, theirs = lu(paladin6(1), "pal"), lu(wizard3(2), "wiz")
+local face = pel("Grid", nil, { pel("Image", "image") })
+local addBtn = pel("ls.LSButton", "AddClassButton", { face })
+setRoot({ assets, addBtn })
+entities.CCLevelUpDefinition = { theirs, mine }
+tick(); dump("Multiplayer level-up, other player's definition first")
+expect(BA.Current.ctx.mode == "Level Up" and BA.Current.ctx.name == "Tav", "multiplayer: follows the own player's level-up")
+entities.CCLevelUpDefinition = { mine, theirs }
+tick(); log = {}
+expect(BA.Current.ctx.name == "Tav", "multiplayer: still the own level-up when the order changes")
+entities.CCLevelUpDefinition = { theirs }
+tick(); log = {}
+expect(BA.Current.ctx.mode == "Party", "multiplayer: another player's level-up alone is not shown")
+-- a character this client controls wins over the owner check
+local driven = paladin6(2); driven.ClientControl = {}
+entities.CCLevelUpDefinition = { theirs, lu(driven, "pal") }
+tick(); log = {}
+expect(BA.Current.ctx.name == "Tav", "multiplayer: the definition of a controlled character is taken")
+-- owners unreadable: the definition shown first stays, whatever the order
+entities.ClientControl = nil
+local a1, b1 = lu(paladin6(nil), "pal"), lu(wizard3(nil), "wiz")
+entities.CCLevelUpDefinition = { a1, b1 }
+tick(); log = {}
+local first = BA.Current.ctx.name
+entities.CCLevelUpDefinition = { b1, a1 }
+tick(); log = {}
+expect(BA.Current.ctx.name == first, "owners unknown: the window keeps the definition it showed: " .. tostring(BA.Current.ctx.name))
+entities.CCLevelUpDefinition = nil
+tick(); log = {}
+
+-- multiclass level: Paladin 6 -> 7 is Sorcerer (sorcadin), a class the character does not have yet
+entities.CCLevelUpDefinition = { lu(paladin6(nil), "pal") }
+tick(); dump("Level up 6 -> 7, new class")
+expect(BA.Current.analysis.classMove == "add" and BA.Current.analysis.ringAddClass == true, "new class: Add Class step")
+expect(face.props.Background == RING, "Add Class button ringed while the class is still Paladin")
+local subs7 = rowsOf(BA.UI.Outline(BA.Current.ctx, { build = BA.Current.build, reason = "" }, BA.Current.analysis).main, "sub")
+expect(subs7[1] and subs7[1]:find("click Add Class", 1, true) ~= nil and subs7[1]:find("Sorcerer", 1, true) ~= nil,
+  "window: the new class starts with Add Class: " .. tostring(subs7[1]))
+entities.CCLevelUpDefinition = { lu(paladin6(nil), "rog") } -- Add Class clicked: the first unused class is selected
+tick(); log = {}
+expect(BA.Current.analysis.ringAddClass == false and face.props.Background == CLEAR, "ring removed once the new classes are offered")
+entities.CCLevelUpDefinition = nil
+tick(); log = {}
+
+-- a level in another class the character has: the carousel icon of that class is ringed
+local function sideItem(name, vm)
+  local holder = pel("Grid", nil, { pel("Image", "icon"), pel("Rectangle", "monochromeIcon") })
+  local root = pel("StackPanel", "ClassRoot", { pel("Grid", nil, { pel("Rectangle", "LevelBackground"), holder }) })
+  local c = pel("Control", name, { root }); c.DataContext = vm
+  return c, holder
+end
+local left, leftHolder = sideItem("CarouselLeftItem", { Type = "ls.VMSelectableClass", Name = "Cleric" })
+local right, rightHolder = sideItem("CarouselRightItem", { Type = "ls.VMSelectableClass", Name = "Sorcerer" })
+local face2 = pel("Grid", nil, { pel("Image", "image") })
+setRoot({ assets, left, right, pel("ls.LSButton", "AddClassButton", { face2 }) })
+local tav = { EocLevel = { Level = 6 }, Classes = { Classes = { { ClassUUID = "sor", SubClassUUID = "stm", Level = 4 },
+              { ClassUUID = "clr", SubClassUUID = "", Level = 2 } } }, Origin = { Origin = "Generic" }, Race = { Race = "human" },
+              DisplayName = { Name = ts("Tav") } }
+BA.Settings.Choices["generic|tav"] = "stormsorc"
+entities.CCLevelUpDefinition = { lu(tav, "clr") }
+tick(); dump("Level up 6 -> 7, switch to Sorcerer")
+expect(BA.Current.analysis.classMove == "switch" and not BA.Current.analysis.ringAddClass, "existing class: switch, no Add Class")
+expect(rightHolder.props.Background == RING and leftHolder.props.Background == nil, "carousel: the plan's class icon ringed, the other not")
+expect(face2.props.Background == nil, "Add Class button not ringed for a class the character has")
+entities.CCLevelUpDefinition = nil
+tick(); log = {}
+expect(rightHolder.props.Background == CLEAR, "carousel ring removed when the screen closes")
+BA.Settings.Choices["generic|tav"] = nil
+
+-- the highlight follows the screen within a fraction of a second, not on the next once-a-second pass
+local function shortTick(ms)
+  now = now + ms
+  for _, f in ipairs(subs.Tick) do f() end
+  local q = deferred; deferred = {}
+  for _, f in ipairs(q) do f() end
+end
+local face3 = pel("Grid", nil, { pel("Image", "image") })
+setRoot({ assets, pel("ls.LSButton", "AddClassButton", { face3 }) })
+shortTick(250)
+entities.CCLevelUpDefinition = { lu(paladin6(nil), "pal") }
+shortTick(250)
+expect(face3.props.Background == RING, "Add Class ring within 250 ms of the level-up screen opening")
+entities.CCLevelUpDefinition = nil
+tick(); log = {}
+
+-- a row that reads empty while the screen fills in is read again on a fresh pass
+local cpRow, cpTxt = passiveRow("Defence")
+local vm = cpRow.DataContext
+cpRow.DataContext = nil
+setRoot({ cpRow })
+local want = { [BA.Norm("Defence")] = "Defence" }
+BA.HL.Apply(want, nil, nil, {})
+cpRow.DataContext = vm
+BA.HL.Apply(want, nil, nil, { fresh = true })
+expect(cpTxt.Text == "* Defence", "fresh pass reads a row that was empty a moment ago")
+BA.HL.Clear()
+end
+
 -- 7) every build has 12 levels, valid abilities (27 point buy) and classes
 local cost = { [8] = 0, [9] = 1, [10] = 2, [11] = 3, [12] = 4, [13] = 5, [14] = 7, [15] = 9 }
 for _, b in ipairs(BA.Builds) do
