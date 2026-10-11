@@ -333,7 +333,11 @@ function BA.UI.Outline(ctx, entry, analysis)
     add(main, "item", "Build complete (level 12).")
   end
   if creation then
-    add(main, "item", "Background: " .. b.background)
+    local bg = b.background
+    if b.bgOwner and BA.OriginKey(ctx) == BA.Norm(b.bgOwner) then
+      bg = bg:gsub("%(", "(" .. BA.OriginLabel(b.bgOwner) .. "'s own: ", 1)
+    end
+    add(main, "item", "Background: " .. bg)
     local ab = {}
     for _, k in ipairs(BA.ABILITIES) do ab[#ab + 1] = k .. " " .. b.base[k] end
     add(main, "item", "Abilities: " .. table.concat(ab, ", ") .. " (+2 " .. b.plus2 .. ", +1 " .. b.plus1 .. ")")

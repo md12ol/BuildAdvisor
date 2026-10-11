@@ -6,6 +6,7 @@
 --   start     : the class to pick at character level 1
 --   races     : best first; races give features only (ability bonuses are free +2/+1)
 --   bg        : the background to pick (exact menu label); background : the window text for it
+--   bgOwner   : the origin whose own, unchangeable background this is (the window says so to that origin only)
 --   deity     : the deity to pick (clerics only; it has no rules effect)
 --   raceHl    : the race's own choices (e.g. the High Elf cantrip, the Human Versatility skill)
 --   base      : point-buy values BEFORE the +2/+1 racial bonus (27 points, 8-15)
@@ -190,7 +191,7 @@ BA.Builds = {
     classes = { "Barbarian", "Rogue", "Fighter" }, start = "Barbarian",
     races = { "Zariel Tiefling", "Githyanki", "Duergar" },
     raceWhy = "Karlach is locked to Zariel Tiefling (fire resistance). Others: Githyanki Misty Step for throwing angles; Duergar Enlarge and Invisibility.",
-    background = "Outlander (Karlach's own: Athletics, Survival)", bg = "Outlander",
+    background = "Outlander (Athletics, Survival)", bg = "Outlander", bgOwner = "Karlach",
     base = { STR = 15, DEX = 14, CON = 15, INT = 8, WIS = 10, CHA = 8 }, plus2 = "STR", plus1 = "CON",
     skills = { "Athletics", "Survival", "Intimidation", "Perception" },
     levels = {
@@ -272,7 +273,7 @@ BA.Builds = {
     classes = { "Fighter" }, start = "Fighter",
     races = { "Githyanki", "Half-Orc", "Shield Dwarf" },
     raceWhy = "Githyanki (Lae'zel, locked): Misty Step, Astral Knowledge; Githyanki Greatsword / Silver Sword psychic bonus. Half-Orc for a Tav: Savage Attacks on crits.",
-    background = "Soldier (Lae'zel's own: Athletics, Intimidation)", bg = "Soldier",
+    background = "Soldier (Athletics, Intimidation)", bg = "Soldier", bgOwner = "Laezel",
     base = { STR = 15, DEX = 10, CON = 15, INT = 8, WIS = 14, CHA = 8 }, plus2 = "STR", plus1 = "CON",
     skills = { "Athletics", "Intimidation", "Perception", "Insight" },
     levels = {
@@ -381,7 +382,7 @@ BA.Builds = {
     classes = { "Cleric", "Sorcerer" }, start = "Cleric",
     races = { "High Half-Elf", "Wood Half-Elf", "Githyanki" },
     raceWhy = "Shadowheart is locked High Half-Elf (spears, glaives, shields; take Mage Hand as the race cantrip). For a Tav: Wood Half-Elf speed or Githyanki Misty Step.",
-    background = "Acolyte (Shadowheart's own; Insight, Religion)", bg = "Acolyte", deity = "Lathander",
+    background = "Acolyte (Insight, Religion)", bg = "Acolyte", bgOwner = "Shadowheart", deity = "Lathander",
     raceHl = { "Mage Hand" },
     base = { STR = 8, DEX = 14, CON = 15, INT = 8, WIS = 15, CHA = 10 }, plus2 = "WIS", plus1 = "CON",
     skills = { "Insight", "Religion", "Medicine", "Persuasion" },
@@ -436,7 +437,7 @@ BA.Builds = {
     classes = { "Wizard", "Cleric" }, start = "Wizard",
     races = { "Human", "Githyanki", "High Elf" },
     raceWhy = "Gale is a locked Human (light armour + shields). For a Tav: Githyanki for Misty Step, High Elf for an extra wizard cantrip; Tempest gives the heavy armour anyway.",
-    background = "Sage (Gale's own)", bg = "Sage", deity = "Talos",
+    background = "Sage (Arcana, History)", bg = "Sage", bgOwner = "Gale", deity = "Talos",
     raceHl = { "Perception" },
     base = { STR = 8, DEX = 14, CON = 15, INT = 15, WIS = 10, CHA = 8 }, plus2 = "INT", plus1 = "CON",
     skills = { "Arcana", "History", "Investigation", "Insight", "Perception" },
@@ -516,7 +517,7 @@ BA.Builds = {
     classes = { "Sorcerer", "Warlock", "Fighter" }, start = "Sorcerer",
     races = { "Human" },
     raceWhy = "Wyll's race is locked. Human Civil Militia gives shield proficiency, so the caster can carry a shield.",
-    background = "Wyll's own background (locked)", bg = "Folk Hero",
+    background = "Folk Hero (Animal Handling, Survival)", bg = "Folk Hero", bgOwner = "Wyll",
     raceHl = { "Perception" },
     base = { STR = 8, DEX = 14, CON = 15, INT = 8, WIS = 10, CHA = 15 }, plus2 = "CHA", plus1 = "CON",
     skills = { "Deception", "Intimidation", "Perception" },
