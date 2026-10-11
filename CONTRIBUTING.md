@@ -40,7 +40,7 @@ The pak builder lives in the sibling repository [BG3Tools](https://github.com/md
 
 ## Tests
 `python tools/run_tests.py` (needs `pip install lupa`) runs the mod against a mocked Script Extender (`tools/mock_test.lua`,
-`tools/ui_gate_test.lua`; add a scenario there for new behaviour). The mock covers character creation, level-up, respec, origin, party view, the highlighter (stars, outlines, spell icons as each spell list and picked / prepared row builds them, point-buy and ability-improvement targets, feat choices, spell swaps, restoring), the hotkey, the window's content (no repeated facts, short locked race, a row per choice to change) and its placement (beside the game's left panel, a move by the player kept).
+`tools/ui_gate_test.lua`; add a scenario there for new behaviour). The mock covers character creation, level-up (also in multiplayer, where each player follows only their own, and at a level in a new or another class), respec, origin, party view, the highlighter (stars, outlines, spell icons as each spell list and picked / prepared row builds them, point-buy and ability-improvement targets, feat choices, spell swaps, the Add Class button and the class carousel, restoring), the hotkey, the window's content (no repeated facts, short locked race, a row per choice to change) and its placement (beside the game's left panel, a move by the player kept).
 
 ## Branches, commits and pull requests
 - **One branch per task**, named after its topic (`ci-setup`, `sets-page-header`, ...), cut from `main`. Nobody

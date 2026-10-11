@@ -1,8 +1,11 @@
 BA = BA or {}
 
 local SETTINGS_FILE = "BuildAdvisor_settings.json"
-local DETECT_INTERVAL_MS = 500
+local DETECT_INTERVAL_MS = 200
 local HIGHLIGHT_INTERVAL_MS = 1000
+-- A screen that has just opened, or whose plan or pending class has just changed, fills its lists over the next
+-- frames: it is highlighted at once and then every FAST_HIGHLIGHT_MS for FAST_WINDOW_MS, not once a second.
+local FAST_HIGHLIGHT_MS, FAST_WINDOW_MS = 150, 2000
 
 BA.Settings = { Hotkey = "F7", AutoOpen = true, Highlight = true, ShowAll = false, FontScale = 0.75, Choices = {},
                 UnsafeUiOnOldSE = false }
@@ -36,6 +39,7 @@ local function signature(ctx, buildId)
 end
 
 local lastSig, lastCreation
+local lastDetect, lastHighlight, lastMenu, fastUntil = 0, 0, 0, 0
 BA.Current = nil -- { ctx, build, analysis }
 
 function BA.Refresh(force)
@@ -72,13 +76,16 @@ function BA.Refresh(force)
 
   local sig = signature(ctx, BA.Current.build and BA.Current.build.id)
   if force or sig ~= lastSig then
+    if sig ~= lastSig then
+      fastUntil = Ext.Utils.MonotonicTime() + FAST_WINDOW_MS
+      lastHighlight = -math.huge
+    end
     lastSig = sig
     local okR, err = pcall(BA.UI.Render, ctx, ranked, idx, analysis or { checks = {}, warnings = {} })
     if not okR then Ext.Utils.PrintError("[Build Advisor] render failed: " .. tostring(err)) end
   end
 end
 
-local lastDetect, lastHighlight, lastMenu = 0, 0, 0
 local function onTick()
   local now = Ext.Utils.MonotonicTime()
   -- the advisor window steps aside while the game's pause menu is open (read in the deferred UI update)
@@ -89,11 +96,12 @@ local function onTick()
     BA.Refresh(false)
     pcall(BA.UI.Watch)
   end
-  if BA.Settings.Highlight and now - lastHighlight >= HIGHLIGHT_INTERVAL_MS then
+  local fast = now < fastUntil
+  if BA.Settings.Highlight and now - lastHighlight >= (fast and FAST_HIGHLIGHT_MS or HIGHLIGHT_INTERVAL_MS) then
     lastHighlight = now
     local cur = BA.Current
     if cur and cur.analysis and BA.IsCreationMode(cur.ctx) then
-      local opts = { onlyPlannedAbilities = cur.ctx.mode == "Level Up" }
+      local opts = { onlyPlannedAbilities = cur.ctx.mode == "Level Up", addClass = cur.analysis.ringAddClass, fresh = fast }
       local a = cur.analysis
       BA.HL.Run(function()
         local ok, err = pcall(BA.HL.Apply, a.highlight, a.abilityPlan, a.skillPlan, opts)

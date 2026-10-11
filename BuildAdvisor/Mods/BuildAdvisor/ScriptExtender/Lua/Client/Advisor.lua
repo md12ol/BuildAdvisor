@@ -125,6 +125,18 @@ function BA.Analyse(ctx, build)
 
   -- Class split so far vs plan
   local have = classCounts(ctx.classes)
+
+  -- A level in a class the character does not have yet starts at the level-up screen's Add Class button; one in
+  -- another class it has is picked with the class arrows. The button is ringed until the player is choosing among
+  -- the new classes (the pending class is then one the character does not have).
+  if ctx.mode == "Level Up" and want then
+    if not have[want] then
+      a.classMove = "add"
+      a.ringAddClass = not (ctx.pendingClass and not have[ctx.pendingClass.name])
+    elseif ctx.pendingClass and ctx.pendingClass.name ~= want then
+      a.classMove = "switch"
+    end
+  end
   local expect = planCounts(build, (ctx.mode == "Level Up") and n - 1 or n)
   if ctx.mode ~= "Character Creation" and ctx.mode ~= "Respec" then
     local diff = {}
