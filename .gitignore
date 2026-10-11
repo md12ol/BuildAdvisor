@@ -6,7 +6,7 @@ dist/
 # built paks, wherever they turn up
 *.pak
 
-# Script Extender IDE helpers (README "Lua tooling"), fetched locally
+# Script Extender IDE helpers (CONTRIBUTING.md "Lua tooling"), fetched locally
 .ide/
 
 # in-game test screenshots (incl. stray shot.sh files at the root)

@@ -7,15 +7,6 @@ Shows the strongest community build for your character and marks the right choic
 - **Every level-up**
 - **Party view** (press the hotkey any time to see the next level-up for the selected character)
 
-It works in two ways:
-
-1. **In the game menus:** every choice the build wants on the current screen gets a `* ` prefix (the game font draws it as a small star): race, subrace, class, subclass, background, deity, skills and expertise, feats and their own choices (for example Resilient: Constitution), spells and cantrips, spells to prepare, the spell to replace, fighting styles, manoeuvres, invocations, metamagic, Pact Boon, Draconic Ancestry, Favoured Enemy and Natural Explorer. Tiles (race, class, subclass, background, deity) and spell icons also get a rainbow outline. Point-buy rows and the ability rows of Ability Improvement show the target score in brackets, e.g. `Strength (17, +2)`; a row too long for its name column uses the game's short name, e.g. `CON (16, +1)`.
-2. **Advisor window** (F7): shows the build, a short "Do this now" list for the current screen, one green line for the choices that already match the plan plus a row for each one to change, and folded sections for the build's details and the full level 1-12 plan. Below them, with
-   [Loot Advisor](https://github.com/md12ol/LootAdvisor) installed, three folded **gear sets** for the build (Loot
-   Advisor's sets 1-3, each a list of items per act; items you have and items that count only if you already have them
-   are marked), read from Loot Advisor while the game runs; without it, one line saying where the gear sets come from.
-   Loot Advisor's sets are made for these builds: a character on none of them gets the closest build's items there. In creation, respec and level-up it sits beside the game's left selection panel, as tall as that panel.
-
 ## Requirements
 - [BG3 Script Extender](https://github.com/Norbyte/bg3se). BG3 Mod Manager can install it. The stars and outlines in the
   game's menus need v33 or newer; on v32 the advisor window works. Until v33 is a normal release, get it from the Devel channel: create a file
@@ -29,9 +20,24 @@ It works in two ways:
    `%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\`. Then enable it in the mod manager and export the load order.
 3. Start the game. The window opens on its own in character creation and level-up. **F7** toggles it (F9 = photo mode and F10 = hide UI are game keys).
 
+**Linux and Steam Deck (Proton):** not covered yet. The install notes assume Windows; instructions for Linux are
+planned in [LootAdvisor#80](https://github.com/md12ol/LootAdvisor/issues/80).
+
+## How to use it
+It works in two ways:
+
+1. **In the game menus:** every choice the build wants on the current screen gets a `* ` prefix (the game font draws it as a small star): race, subrace, class, subclass, background, deity, skills and expertise, feats and their own choices (for example Resilient: Constitution), spells and cantrips, spells to prepare, the spell to replace, fighting styles, manoeuvres, invocations, metamagic, Pact Boon, Draconic Ancestry, Favoured Enemy and Natural Explorer. Tiles (race, class, subclass, background, deity) and spell icons also get a rainbow outline. Point-buy rows and the ability rows of Ability Improvement show the target score in brackets, e.g. `Strength (17, +2)`; a row too long for its name column uses the game's short name, e.g. `CON (16, +1)`.
+2. **Advisor window** (F7): shows the build, a short "Do this now" list for the current screen, one green line for the choices that already match the plan plus a row for each one to change, and folded sections for the build's details and the full level 1-12 plan. Below them, with
+   [Loot Advisor](https://github.com/md12ol/LootAdvisor) installed, three folded **gear sets** for the build (Loot
+   Advisor's sets 1-3, each a list of items per act; items you have and items that count only if you already have them
+   are marked), read from Loot Advisor while the game runs; without it, one line saying where the gear sets come from.
+   Loot Advisor's sets are made for these builds: a character on none of them gets the closest build's items there. In creation, respec and level-up it sits beside the game's left selection panel, as tall as that panel.
+
 ## Settings
 These are in the window: build picker (remembered for each character), *Show all builds*, *Highlight in game menus*, *Auto-open*.
 Console commands (Script Extender console): `!ba_toggle`, `!ba_dump` (prints what the mod detects), `!ba_hotkey F7`.
+More options (hotkey, text size, the build picked per character) are in `BuildAdvisor_settings.json` in the Script
+Extender folder; `Handbook.html` in the download, chapter "Settings", lists them.
 
 ## Builds included (Patch 8 meta)
 | Build | Tier | Start class | Suggested for |
@@ -59,109 +65,6 @@ Console commands (Script Extender console): `!ba_toggle`, `!ba_dump` (prints wha
 | Circle of the Moon Druid 12 | A | Druid | Halsin |
 | Circle of the Stars Druid 12 | A | Druid | Jaheira |
 
-To edit or add builds, change `BuildAdvisor/Mods/BuildAdvisor/ScriptExtender/Lua/Shared/Builds.lua`. Each level's `hl` list holds the exact English menu labels to star (`asi` the ability raises, `swap` a spell to replace). Check every label and level against the game's own data, then rebuild. `check_hl.py` reads the game's paks and the
-English localisation and stats that the sibling `../LootAdvisor` extracts, so run Loot Advisor's Rebuild (at least
-`build_cache.py` and `stats.py`) first; a new build also needs a profile in `../LootAdvisor/tools/build_profiles.py`:
-
-```bash
-python tools/check_hl.py        # 0 unknown labels, 0 plan errors, 0 spell icon errors
-python ../BG3Tools/tools/build_pak.py BuildAdvisor   # -> dist/BuildAdvisor.pak + the player package dist/BuildAdvisor/
-python ../BG3Tools/tools/ci_release.py check BuildAdvisor   # what CI runs: build, zip the package, check it against INSTALL.md
-```
-The pak builder lives in the sibling repository [BG3Tools](https://github.com/md12ol/BG3Tools), checked out next to this one. Built paks are not committed; `dist/` is gitignored.
-
-## Repository layout
-| Path | What |
-|---|---|
-| `BuildAdvisor/` | the mod source as in other BG3 mod repositories: `BuildAdvisor/Mods/BuildAdvisor/` (meta.lsx, Lua, GUI); `Public/` and `Localization/` next to it when the mod needs them. This folder is what gets packed |
-| `package/` | the hand-made part of the player package: `INSTALL.md` and `Media/` (Gilded Panel banner, thumbnail, marks, screenshots; list in BG3Tools `tools/release_files.py`) |
-| `dist/` | local builds (gitignored): `BuildAdvisor.pak` and the player package `dist/BuildAdvisor/` (pak, `INSTALL.md`, `Handbook.html`, `Media/`), which a release zips as `BuildAdvisor-X.Y.Z.zip` |
-| `docs_site/` | the docs site; `python docs_site/build_player_handbook.py` makes the player `Handbook.html` from it (with a leak check) |
-| `tools/` | tests and the highlight-label checker |
-| `branding/` | the logo and banner generators |
-| `.luarc.json` | Lua language server settings (see Lua tooling below) |
-| `nexus_description.bb` | the Nexus Mods page text (BBCode) |
-| `LICENSE` | MIT |
-
-### Lua tooling
-`.luarc.json` configures [Lua Language Server](https://luals.github.io/) (the VS Code "Lua" extension) for Script Extender's Lua 5.4 and its globals. For completion of `Ext.*`, `Osi.*` and the entity types, fetch Script Extender's IDE helpers ([`ExtIdeHelpers.lua`](https://github.com/Norbyte/bg3se/blob/main/BG3Extender/IdeHelpers/ExtIdeHelpers.lua) from the bg3se repository) into `.ide/`, which `.luarc.json` already lists as a library:
-```bash
-curl -L --create-dirs -o .ide/ExtIdeHelpers.lua https://raw.githubusercontent.com/Norbyte/bg3se/main/BG3Extender/IdeHelpers/ExtIdeHelpers.lua
-```
-`.ide/` is gitignored: the helpers are Script Extender's own file under its own license, so they are not copied here.
-
-The outline textures are built with `python ../LootAdvisor/tools/make_la_gui.py BuildAdvisor/Mods/BuildAdvisor/GUI --set build` (sibling LootAdvisor repository; recoloured from the game's own frame textures, shipped under Larian's modding terms).
-
-## Tests
-`python tools/run_tests.py` (needs `pip install lupa`) runs the mod against a mocked Script Extender (`tools/mock_test.lua`,
-`tools/ui_gate_test.lua`; add a scenario there for new behaviour). The mock covers character creation, level-up, respec, origin, party view, the highlighter (stars, outlines, spell icons as each spell list and picked / prepared row builds them, point-buy and ability-improvement targets, feat choices, spell swaps, restoring), the hotkey, the window's content (no repeated facts, short locked race, a row per choice to change) and its placement (beside the game's left panel, a move by the player kept).
-
-## Releases
-Versions are SemVer tags `vX.Y.Z`; the first release is `v0.9.0` (set by `release-as` in
-`release-please-config.json`; delete that line once v0.9.0 is out). The release workflow
-(`.github/workflows/release.yml`) runs release-please on every push to `main`: it keeps one open pull request
-"chore: release vX.Y.Z" with the next version and the `CHANGELOG.md` entry built from the Conventional Commit
-messages. **Nothing is tagged until you merge that PR.** Merging it creates the tag and the GitHub Release; the
-workflow then stamps the version into `meta.lsx` (Version64), builds the pak, zips the player package as
-`BuildAdvisor-X.Y.Z.zip`, checks the zip against `INSTALL.md` and attaches it to the Release. A manual run of the workflow
-(`gh workflow run release.yml -f tag=vX.Y.Z`) rebuilds and re-attaches the zip of an existing tag.
-The release PR is opened by the workflow token, so GitHub does not run CI on it: merge it as an admin (branch
-protection lets admins through) after checking the CHANGELOG.
-
-**Nexus Mods upload** (optional, skipped until configured) uses Nexus Mods' official
-[upload-action](https://github.com/Nexus-Mods/upload-action) and Upload API. Setup, once the mod page exists:
-1. Create the mod page on Nexus Mods and upload the first file by hand (the API adds new *versions* of an existing
-   file).
-2. Note the mod ID (in the page URL) and the file ID (Files tab, "Advanced", or the Manage Files edit menu).
-3. Create an API key at <https://www.nexusmods.com/settings/api-keys>.
-4. In this repository: `gh secret set NEXUS_API_KEY`, `gh variable set NEXUS_MOD_ID --body <mod id>`,
-   `gh variable set NEXUS_FILE_ID --body <file id>`.
-From then on every release also uploads the zip to Nexus as a new version of that file (the old version is archived,
-the Release notes become the Nexus changelog).
-
-**mod.io release through Larian's Toolkit** (by hand, next to the GitHub and Nexus release; the Toolkit builds and
-uploads its own pak, so this is done once per version from the released source):
-1. Install the Baldur's Gate 3 Toolkit app and its data DLC (Steam). On the first start, type the game's `Data`
-   folder into the "Enter Data Path" field.
-2. New Project > **Import** the release's `BuildAdvisor.pak` (same UUID and folder as ours), then copy the mod source
-   `BuildAdvisor/Mods/BuildAdvisor/` by hand over the Toolkit's `Data\Mods\BuildAdvisor\`. Import skips every file in
-   `ScriptExtender/Lua/Shared/`, so never publish from the import alone. Answer **No** when it offers to add GustavX
-   as a dependency.
-3. Project Settings (Ctrl+P): set Author to `Michael Dubé` (the Toolkit fills in the account name and can drop the
-   `é`), select `BuildAdvisor/Mods/BuildAdvisor/mod_publish_logo.png` as the thumbnail (PNG, 16:9, at least 512x288, at most
-   8 MB), check the Description (the Toolkit keeps at most 250 characters; the meta.lsx one is kept under that and
-   a test checks it), then Save.
-4. **Publish Local**. It writes `BuildAdvisor_<UUID>.pak` straight into the game's mod folder
-   (`%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods`). Compare its file list with our build:
-   `python ../LootAdvisor/tools/pak.py list <that pak>` against
-   `python ../LootAdvisor/tools/pak.py list dist/BuildAdvisor.pak` (Loot Advisor's pak reader, from the sibling
-   checkout) must show the same paths. Then move that pak out of the mod folder, since it has the same UUID as the
-   regular install.
-5. Sign in (Project Settings > Authenticate) and **Publish**: maintainer only, this uploads to mod.io.
-
-The Toolkit regenerates `meta.lsx` from its project settings: it drops `Type`, `Tags` and the Story target mode,
-adds `PublishHandle`, `Conflicts`, `FileSize` and `MD5`, and bumps the build number of `Version64` on every Publish
-Local (its "Auto-increment" box). It also re-saves `GUI/metadata.lsf` with its own engine version. Once a version is
-published, copy the `PublishHandle` the Toolkit assigned back into this repository's `meta.lsx`, so the Nexus and
-mod.io builds stay the same mod.
-
-## Contributing
-Setup, building and testing in the game for both mods: see
-[CONTRIBUTING in BG3Tools](https://github.com/md12ol/BG3Tools/blob/main/CONTRIBUTING.md) (`sh setup.sh` there clones
-the repositories side by side and installs the pre-push hook).
-
-- **One branch per task**, named after its topic (`ci-setup`, `sets-page-header`, ...), cut from `main`. Nobody
-  commits to `main` directly: it is protected and only takes pull requests.
-- **Commits and PR titles use [Conventional Commits](https://www.conventionalcommits.org/)**: `feat:`, `fix:`,
-  `docs:`, `chore:`, `refactor:`, `test:`, `ci:` (`feat!:` for a breaking change). A commit message is a subject line
-  plus at most one body line. No co-author, "generated with" or other attribution lines.
-- Open a pull request to `main` (`gh pr create`); the CI checks (`lint`, `tests`, `pr-title`) must be green. CI checks out the sibling
-  repositories side by side and uses their branch of the same name when it exists, else `main`.
-- Merge with **"Create a merge commit"** (`gh pr merge --merge`, i.e. `--no-ff`); squash and rebase merges are off so
-  the branch history stays readable. The PR title becomes the merge commit subject.
-- Tests that need the game's data run locally only, in the pre-push hook (see CONTRIBUTING in
-  [BG3Tools](https://github.com/md12ol/BG3Tools)); it runs the full suite before every push.
-
 ## Known limits
 - Every game call is wrapped, so a game patch makes a feature fail quietly instead of crashing. If something doesn't show, run `!ba_dump` in the SE console.
 - Highlighting changes the text and colour of matching labels. If a menu looks wrong, untick *Highlight in game menus*. The window still works on its own.
@@ -174,3 +77,10 @@ the repositories side by side and installs the pre-push hook).
 - [HackTheMinotaur – best builds / multiclass](https://hacktheminotaur.com/baldurs-gate-3/baldurs-gate-3-best-builds/)
 - [PlayNews – 10 best single-class builds 2026](https://www.playnews.gg/en/guides/baldur-s-gate-3-the-10-best-single-class-builds-2026-paladin-barbarian-warlock-and-company-without-touching-multiclass)
 - [KeenGamer – optimized origin builds](https://www.keengamer.com/articles/guides/optimized-builds-for-the-baldurs-gate-3-origin-characters/)
+## Support
+Bugs and questions: [open an issue](https://github.com/md12ol/BuildAdvisor/issues). Say which version of Build Advisor
+and of Script Extender you run; the output of `!ba_dump` in the Script Extender console helps.
+
+## Developing
+Repository layout, adding builds, tests, building and contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md). How a
+version is released: [`RELEASING.md`](RELEASING.md). Licence: MIT ([`LICENSE`](LICENSE)).
