@@ -20,8 +20,9 @@ Shows the strongest community build for your character and marks the right choic
    `%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\`. Then enable it in the mod manager and export the load order.
 3. Start the game. The window opens on its own in character creation and level-up. **F7** toggles it (F9 = photo mode and F10 = hide UI are game keys).
 
-**Linux and Steam Deck (Proton):** not covered yet. The install notes assume Windows; instructions for Linux are
-planned in [LootAdvisor#80](https://github.com/md12ol/LootAdvisor/issues/80).
+**Linux and Steam Deck (Proton):** not tested yet. [`INSTALL.md`](package/INSTALL.md#linux-and-steam-deck-untested)
+has a *Linux and Steam Deck (untested)* section: the Script Extender launch option and where the game's folders are
+inside the Proton prefix. Reports are welcome in [LootAdvisor#80](https://github.com/md12ol/LootAdvisor/issues/80).
 
 ## How to use it
 It works in two ways:
