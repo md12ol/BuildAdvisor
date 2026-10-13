@@ -166,6 +166,8 @@ function BA.Analyse(ctx, build)
     for ab, amount in pairs(a.step.asi) do a.abilityPlan[ab] = { final = scores[ab], bonus = amount } end
   end
   if ctx.abilities then
+    -- no racial choices read means the placement is unknown, not that no bonus was placed
+    local racialKnown = ctx.racial ~= nil and next(ctx.racial) ~= nil
     for _, ab in ipairs(BA.ABILITIES) do
       local target = build.base[ab]
       local bonus = (ab == build.plus2 and 2) or (ab == build.plus1 and 1) or 0
@@ -175,9 +177,18 @@ function BA.Analyse(ctx, build)
           table.insert(a.checks, { ok = cur >= target + bonus, label = ab, text = string.format("%s %d (plan >= %d)", ab, cur, target + bonus), minor = true })
         else
           local curBonus = (ctx.racial and ctx.racial[ab]) or 0
-          local okBase = cur == target or cur + curBonus == target + bonus
-          table.insert(a.checks, { ok = okBase, minor = true, label = ab,
-            text = string.format("%s: %d -> set %d%s", ab, cur, target, bonus > 0 and (" (+" .. bonus .. " racial)") or "") })
+          local ok, text
+          if racialKnown then
+            ok = cur + curBonus == target + bonus
+          else
+            ok = cur == target or cur + curBonus == target + bonus
+          end
+          if cur == target and not ok then
+            text = string.format("%s: racial bonus +%d -> make it +%d", ab, curBonus, bonus)
+          else
+            text = string.format("%s: %d -> set %d%s", ab, cur, target, bonus > 0 and (" (+" .. bonus .. " racial)") or "")
+          end
+          table.insert(a.checks, { ok = ok, minor = true, label = ab, text = text })
         end
       end
     end

@@ -585,6 +585,27 @@ lz.pendingClass = { name = "Wizard" }
 out = BA.UI.Outline(lz, lzEntry, BA.Analyse(lz, lzEntry.build))
 local bad = rowsOf(out.main, "bad")
 expect(#bad == 1 and bad[1]:find("take Fighter") ~= nil, "wrong class gets a red row: " .. tostring(bad[1]))
+-- the planned point buy with the racial +2/+1 on other abilities ends on other final scores
+local te = BA.BuildById.tempestevoker
+local gale = { mode = "Respec", level = 1, name = "Gale", origin = "Gale", race = { display = "Human" },
+  pendingClass = { name = te.levels[1].cls }, classes = { { name = te.levels[1].cls, display = te.levels[1].cls, level = 1 } },
+  abilities = {}, racial = { [te.plus2] = 2, [te.plus1] = 1 } }
+for _, ab in ipairs(BA.ABILITIES) do gale.abilities[ab] = te.base[ab] end
+local galeEntry = { build = te, reason = "" }
+out = BA.UI.Outline(gale, galeEntry, BA.Analyse(gale, te))
+oks = rowsOf(out.main, "ok")
+expect(oks[1] == "All match the plan: class, abilities", "planned point buy and racial bonus: abilities match: " .. tostring(oks[1]))
+local wrong = te.plus2 == "CON" and "DEX" or "CON"
+gale.racial = { [wrong] = 2, STR = 1 }
+out = BA.UI.Outline(gale, galeEntry, BA.Analyse(gale, te))
+oks, warns = rowsOf(out.main, "ok"), rowsOf(out.main, "warn")
+local namesBonus = false
+for _, w in ipairs(warns) do if w:find("^" .. te.plus2 .. ": racial bonus %+0 %-> make it %+2") then namesBonus = true end end
+expect(oks[1] == "Matches the plan: class" and namesBonus,
+  "planned point buy, racial bonus elsewhere: abilities need a change naming the bonus: " .. tostring(oks[1]) .. " / " .. tostring(warns[1]))
+gale.racial = {}
+out = BA.UI.Outline(gale, galeEntry, BA.Analyse(gale, te))
+expect(rowsOf(out.main, "ok")[1] == "All match the plan: class, abilities", "racial choices unread: the point buy alone decides")
 local lv = { mode = "Level Up", level = 5, name = "Lae'zel", origin = "Laezel", race = { display = "Githyanki" },
   pendingClass = { name = "Fighter" }, classes = { { name = "Fighter", display = "Fighter", level = 4 } } }
 out = BA.UI.Outline(lv, lzEntry, BA.Analyse(lv, lzEntry.build))

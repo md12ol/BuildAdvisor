@@ -163,6 +163,8 @@ MOCK_MUTATIONS = [
      {"Highlighter.lua": [("          add(statEntry(e.container) and statEntry(e.container).name)", "")]}),
     ("Window.lua: an origin's own background named to everyone on that build",
      {"Window.lua": [("if b.bgOwner and BA.OriginKey(ctx) == BA.Norm(b.bgOwner) then", "if b.bgOwner then")]}),
+    ("Advisor.lua: the planned point buy matches whatever abilities got the racial bonus",
+     {"Advisor.lua": [("local racialKnown = ctx.racial ~= nil and next(ctx.racial) ~= nil", "local racialKnown = false")]}),
     ("Window.lua: the class's skills repeated next to the full skills line",
      {"Window.lua": [('if not (creation and p:find("^Skills:")) then', "if true then")]}),
     ("Window.lua: a locked race shown as the build's whole race list",

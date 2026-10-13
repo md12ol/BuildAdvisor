@@ -229,6 +229,7 @@ function BA.Detect()
         local first = d.LevelUpData and d.LevelUpData[1]
         local ci = first and classInfo(first.Class, first.SubClass)
         if ci then ci.level = 1; c.classes = { ci }; c.pendingClass = ci end
+        c.racial = first and racialBonuses(first)
         c.abilities = abilityTable(d.Abilities, true)
         return c
       end)
