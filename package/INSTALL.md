@@ -34,6 +34,22 @@
 2. Copy `BuildAdvisor.pak` to `%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\`.
 3. Enable it in the load order (a mod manager is the safe way to edit `modsettings.lsx`).
 
+## Linux and Steam Deck (untested)
+**Nobody has tested Build Advisor on Linux or a Steam Deck yet.** These notes say what should differ when the game
+runs through Steam's Proton; points marked *(unverified)* are the least certain. If you try it, please report what
+worked and what did not in [this issue](https://github.com/md12ol/LootAdvisor/issues/80).
+
+- **Script Extender** loads under Proton only with this Steam launch option (game *Properties > General > Launch
+  Options*): `WINEDLLOVERRIDES="DWrite=n,b" %command%`. The game's `bin` folder (for the Devel channel file above)
+  is inside the game's install folder: Steam *Manage > Browse local files*.
+- **The game's user-data folder** (Windows `%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\`) is inside the Proton
+  prefix:
+  `~/.steam/steam/steamapps/compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/`.
+  If the game is in another Steam library folder, `steamapps/compatdata/1086940/` is under that library instead.
+  Flatpak Steam keeps its files under `~/.var/app/com.valvesoftware.Steam/` *(unverified: the exact path below it)*.
+- **Mods folder** for installing by hand: the `Mods` folder inside that user-data folder.
+- **BG3 Mod Manager:** the steps above are the same *(unverified on Linux)*.
+
 ## Where to find it in the game
 - The advisor window opens by itself in character creation, the Withers respec and every level-up; **F7** toggles it.
 - Choices the build wants are starred (`*`) in the game menus; tiles and spell icons get a rainbow outline.
