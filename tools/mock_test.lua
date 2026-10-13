@@ -624,6 +624,24 @@ lvc.level = 3
 hlc = BA.Analyse(lvc, lq).highlight
 expect(hlc[BA.Norm("Spiritual Weapon")] and hlc[BA.Norm("Bless")], "level-up to 3: this level's and earlier prepared spells")
 
+-- an origin's own background is named only to that origin: a hireling on the same build gets the plain note
+local function bgRow(origin, id)
+  local c = { mode = "Respec", level = 1, name = "x", origin = origin, race = { display = "Human" },
+    pendingClass = { name = "Cleric" }, classes = { { name = "Cleric", display = "Cleric", level = 1 } } }
+  local e = { build = BA.BuildById[id], reason = "" }
+  for _, t in ipairs(rowsOf(BA.UI.Outline(c, e, BA.Analyse(c, e.build)).main, "item")) do
+    if t:find("^Background:") then return t end
+  end
+end
+expect(bgRow("Generic", "lightquick") == "Background: Acolyte (Insight, Religion)", "hireling on Shadowheart's build: plain background: " .. tostring(bgRow("Generic", "lightquick")))
+expect(bgRow("ShadowHeart", "lightquick") == "Background: Acolyte (Shadowheart's own: Insight, Religion)", "Shadowheart: her own background: " .. tostring(bgRow("ShadowHeart", "lightquick")))
+expect(bgRow("Laezel", "bmgiant") == "Background: Soldier (Lae'zel's own: Athletics, Intimidation)", "Lae'zel: her own background: " .. tostring(bgRow("Laezel", "bmgiant")))
+local namedOrigin = {}
+for _, b in ipairs(BA.Builds) do
+  if b.background:find("'s own") or (b.bgOwner and not BA.Origins[BA.Norm(b.bgOwner)]) then namedOrigin[#namedOrigin + 1] = b.id end
+end
+expect(#namedOrigin == 0, "no build names an origin in its shared background text, every bgOwner is an origin: " .. table.concat(namedOrigin, ", "))
+
 -- 16) placement: beside the game's left panel in the menus, the old spot outside, the player's move kept
 local pos1, size1 = BA.UI.DockRect(2560, 1600)
 local s16 = 1600 / 2160
